@@ -15,3 +15,11 @@
     - Config file for all auth setup and user preferences
     - Cli
     - Cache card/ticket info and list
+
+* File Structure (* is file, - is folder)
+    - Main Folder
+        - Jira API Helpers Folder
+        - TUI Helpers Folder
+        - State Interaction Folder (Main view, ticket view, etc)
+        - Cache Folder
+        * Config File
