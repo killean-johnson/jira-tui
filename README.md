@@ -12,3 +12,6 @@
         * add card dialogue state
         * sort settings state (Pop-up box?)
     - Sorting is a small popup that you can use j and k to walk up and down and enter to select the sort option
+    - Config file for all auth setup and user preferences
+    - Cli
+    - Cache card/ticket info and list
