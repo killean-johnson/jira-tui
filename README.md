@@ -23,3 +23,8 @@
         - State Interaction Folder (Main view, ticket view, etc)
         - Cache Folder
         * Config File
+
+* TODO
+    - Learn Go
+    - Learn Bubble Tea and Bubbles OR _gocui_, using lazygit and other examples to grow from
+    - Use go-jira for jira access and management
