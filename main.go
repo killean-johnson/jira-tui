@@ -7,67 +7,67 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/joho/godotenv"
+	"github.com/killean-johnson/jira-tui/jirautils"
 )
 
 func MarshalPrint(obj interface{}) {
-    s, _ := json.MarshalIndent(obj, "", "\t")
-    fmt.Printf("%v\n", string(s))
+	s, _ := json.MarshalIndent(obj, "", "\t")
+	fmt.Printf("%v\n", string(s))
 }
 
 func main() {
-    // Set up env
-    godotenv.Load()
-    jiraToken := os.Getenv("JIRA_API_TOKEN")
-    VVID := os.Getenv("JIRA_VV_TABLE_ID")
+	// Set up env
+	godotenv.Load()
+	jiraToken := os.Getenv("JIRA_API_TOKEN")
+	VVID := os.Getenv("JIRA_VV_TABLE_ID")
 
-    jirautils.createClient("killean.johnson@stairsupplies.com", jiraToken)
+	client := jirautils.CreateClient("killean.johnson@stairsupplies.com", jiraToken)
 
-    // Set up client
-    authTransport := jira.BasicAuthTransport {
-        Username: "killean.johnson@stairsupplies.com",
-        Password: jiraToken,
-    }
+	// Set up client
+	authTransport := jira.BasicAuthTransport{
+		Username: "killean.johnson@stairsupplies.com",
+		Password: jiraToken,
+	}
 
-    jiraClient, err := jira.NewClient(authTransport.Client(), "https://stairsupplies-voe.atlassian.net")
+	jiraClient, err := jira.NewClient(authTransport.Client(), "https://stairsupplies-voe.atlassian.net")
 
-    if err != nil {
-        fmt.Println("Bork")
-        os.Exit(0)
-    }
+	if err != nil {
+		fmt.Println("Bork")
+		os.Exit(0)
+	}
 
-    // List out boards
-    //threeBoards, _, _ := //jiraClient.Board.GetAllSprints(
-    // projects, _, _ := jiraClient.Project.GetList()
-    // s, _ :=json.MarshalIndent(projects, "", "\t")
-    // fmt.Printf("projects: %v\n", string(s))
+	// List out boards
+	//threeBoards, _, _ := //jiraClient.Board.GetAllSprints(
+	// projects, _, _ := jiraClient.Project.GetList()
+	// s, _ :=json.MarshalIndent(projects, "", "\t")
+	// fmt.Printf("projects: %v\n", string(s))
 
-    boardOpt := &jira.BoardListOptions {
-        ProjectKeyOrID: VVID,
+	boardOpt := &jira.BoardListOptions{
+		ProjectKeyOrID: VVID,
+	}
+	board, _, _ := .Board.GetAllBoards(boardOpt)
+	var boardId string = fmt.Sprint(board.Values[0].ID)
 
-    }
-    board, _, _ := jiraClient.Board.GetAllBoards(boardOpt)
-    var boardId string = fmt.Sprint(board.Values[0].ID)
+	sprints, _, _ := jiraClient.Board.GetAllSprints(boardId)
 
-    sprints, _, _ := jiraClient.Board.GetAllSprints(boardId)
-    
-    for i := 0; i < len(sprints); i++ {
-        spr := sprints[i]
-        issues, _, _ := jiraClient.Sprint.GetIssuesForSprint(spr.ID)
-        MarshalPrint(issues)
-    }
+	for i := 0; i < len(sprints); i++ {
+		spr := sprints[i]
+		issues, _, _ := jiraClient.Sprint.GetIssuesForSprint(spr.ID)
+		MarshalPrint(issues)
+	}
 
-    // Search for issues
-    // opt := &jira.SearchOptions{
-		// MaxResults: 10,
-		// Expand:     "fields",
+	// Search for issues
+	// opt := &jira.SearchOptions{
+	// MaxResults: 10,
+	// Expand:     "fields",
 	// }
-    // issue, _, er := jiraClient.Issue.Search("", opt)
-    
-    // if er != nil {
-    //     fmt.Printf("Failed! %+v", er)
-    // } else {
-    //     fmt.Printf("\nIssues: %+v\nSuccess!\n", issue)
-    // }
+	// issue, _, er := jiraClient.Issue.Search("", opt)
+
+	// if er != nil {
+	//     fmt.Printf("Failed! %+v", er)
+	// } else {
+	//     fmt.Printf("\nIssues: %+v\nSuccess!\n", issue)
+	// }
 }
 
 // import (
