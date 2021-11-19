@@ -20,6 +20,8 @@ func main() {
     jiraToken := os.Getenv("JIRA_API_TOKEN")
     VVID := os.Getenv("JIRA_VV_TABLE_ID")
 
+    jirautils.createClient("killean.johnson@stairsupplies.com", jiraToken)
+
     // Set up client
     authTransport := jira.BasicAuthTransport {
         Username: "killean.johnson@stairsupplies.com",
