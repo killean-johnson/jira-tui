@@ -7,6 +7,7 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/joho/godotenv"
+	"github.com/killean-johnson/jira-tui/config"
 	"github.com/killean-johnson/jira-tui/jirautils"
 )
 
@@ -16,6 +17,8 @@ func MarshalPrint(obj interface{}) {
 }
 
 func main() {
+
+	config.LoadConfig()
 	// Set up env
 	godotenv.Load()
 	jiraToken := os.Getenv("JIRA_API_TOKEN")
@@ -45,7 +48,7 @@ func main() {
 	boardOpt := &jira.BoardListOptions{
 		ProjectKeyOrID: VVID,
 	}
-	board, _, _ := .Board.GetAllBoards(boardOpt)
+	board, _, _ := client.Board.GetAllBoards(boardOpt)
 	var boardId string = fmt.Sprint(board.Values[0].ID)
 
 	sprints, _, _ := jiraClient.Board.GetAllSprints(boardId)
