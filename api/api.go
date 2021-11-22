@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/andygrunwald/go-jira"
 )
@@ -17,14 +18,13 @@ func (jc *JiraClient) Connect(username string, token string) {
 		Password: token,
 	}
 
-	//TODO: get url from user config
-	client, err := jira.NewClient(authTransport.Client(), "https://stairsupplies-voe.atlassian.net")
+	client, err := jira.NewClient(authTransport.Client(), os.Getenv("JIRA_BOARD_URL"))
 
 	if err != nil {
 		fmt.Println("ERR IN createClient FUNC")
-	}
-
-	jc.client = client
+	} else {
+        jc.client = client
+    }
 }
 
 // Get all projects
@@ -39,15 +39,27 @@ func (jc *JiraClient) GetProjectList() (*jira.ProjectList, error) {
 
 // get all boards that exist on project
 // loads project from userConfig
-func (jc *JiraClient) GetBoardList() ([]jira.BoardsList, error) {
-	return nil, nil
+func (jc *JiraClient) GetBoardList() (*jira.BoardsList, error) {
+    boards, _, err := jc.client.Board.GetAllBoards(nil)
+    if err != nil {
+        return nil, err
+    }
+	return boards, nil
 }
 
-func (jc *JiraClient) GetSprintList() ([]jira.SprintsList, error) {
-	return nil, nil
+func (jc *JiraClient) GetSprintList(boardId string) ([]jira.Sprint, error) {
+    sprints, _, err := jc.client.Board.GetAllSprints(boardId)
+    if err != nil {
+        return nil, err
+    }
+	return sprints, nil
 }
 
 // get all statuses that a jira card could be in
-func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
-	return nil, nil
+func (jc *JiraClient) GetStatusList() ([]jira.Status, error) {
+    statuses, _, err := jc.client.Status.GetAllStatuses()
+    if err != nil {
+        return nil, err
+    }
+	return statuses, nil
 }
