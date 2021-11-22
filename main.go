@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andygrunwald/go-jira"
 	"github.com/joho/godotenv"
-	"github.com/killean-johnson/jira-tui/jirautils"
+	"github.com/killean-johnson/jira-tui/api"
 )
 
 func MarshalPrint(obj interface{}) {
@@ -19,22 +18,43 @@ func main() {
 	// Set up env
 	godotenv.Load()
 	jiraToken := os.Getenv("JIRA_API_TOKEN")
-	VVID := os.Getenv("JIRA_VV_TABLE_ID")
+	// VVID := os.Getenv("JIRA_VV_TABLE_ID")
 
-	client := jirautils.CreateClient("killean.johnson@stairsupplies.com", jiraToken)
+	client := &api.JiraClient{}
+	client.Connect("killean.johnson@stairsupplies.com", jiraToken)
 
-	// Set up client
-	authTransport := jira.BasicAuthTransport{
-		Username: "killean.johnson@stairsupplies.com",
-		Password: jiraToken,
-	}
-
-	jiraClient, err := jira.NewClient(authTransport.Client(), "https://stairsupplies-voe.atlassian.net")
-
+	projectList, err := client.GetProjectList()
 	if err != nil {
-		fmt.Println("Bork")
-		os.Exit(0)
+		fmt.Println(err)
 	}
+	MarshalPrint(projectList)
+
+	/* projects, _, err := client.Project.GetList()
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(projects) */
+
+	/* boardList, _, err := client.Board.GetAllBoards(&jira.BoardListOptions{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(boardList.Values) */
+
+	/* searchFields := []string{"summary", "status"}
+	issues, _, err := client.Issue.Search("sprint = ", &jira.SearchOptions{
+		Fields: searchFields,
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(issues) */
+
+	/* categoryList, _, err := client.StatusCategory.GetList()
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(categoryList) */
 
 	// List out boards
 	//threeBoards, _, _ := //jiraClient.Board.GetAllSprints(
@@ -42,10 +62,10 @@ func main() {
 	// s, _ :=json.MarshalIndent(projects, "", "\t")
 	// fmt.Printf("projects: %v\n", string(s))
 
-	boardOpt := &jira.BoardListOptions{
+	/* boardOpt := &jira.BoardListOptions{
 		ProjectKeyOrID: VVID,
 	}
-	board, _, _ := .Board.GetAllBoards(boardOpt)
+	board, _, _ := client.Board.GetAllBoards(boardOpt)
 	var boardId string = fmt.Sprint(board.Values[0].ID)
 
 	sprints, _, _ := jiraClient.Board.GetAllSprints(boardId)
@@ -54,7 +74,7 @@ func main() {
 		spr := sprints[i]
 		issues, _, _ := jiraClient.Sprint.GetIssuesForSprint(spr.ID)
 		MarshalPrint(issues)
-	}
+	} */
 
 	// Search for issues
 	// opt := &jira.SearchOptions{
