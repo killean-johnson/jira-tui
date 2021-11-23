@@ -23,8 +23,8 @@ func (jc *JiraClient) Connect(username string, token string) {
 	if err != nil {
 		fmt.Println("ERR IN createClient FUNC")
 	} else {
-        jc.client = client
-    }
+		jc.client = client
+	}
 }
 
 // Get all projects
@@ -40,26 +40,26 @@ func (jc *JiraClient) GetProjectList() (*jira.ProjectList, error) {
 // get all boards that exist on project
 // loads project from userConfig
 func (jc *JiraClient) GetBoardList() (*jira.BoardsList, error) {
-    boards, _, err := jc.client.Board.GetAllBoards(nil)
-    if err != nil {
-        return nil, err
-    }
+	boards, _, err := jc.client.Board.GetAllBoards(nil)
+	if err != nil {
+		return nil, err
+	}
 	return boards, nil
 }
 
 func (jc *JiraClient) GetSprintList(boardId string) ([]jira.Sprint, error) {
-    sprints, _, err := jc.client.Board.GetAllSprints(boardId)
-    if err != nil {
-        return nil, err
-    }
+	sprints, _, err := jc.client.Board.GetAllSprints(boardId)
+	if err != nil {
+		return nil, err
+	}
 	return sprints, nil
 }
 
 // get all statuses that a jira card could be in
-func (jc *JiraClient) GetStatusList() ([]jira.Status, error) {
-    statuses, _, err := jc.client.Status.GetAllStatuses()
-    if err != nil {
-        return nil, err
-    }
+func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
+	statuses, _, err := jc.client.StatusCategory.GetList()
+	if err != nil {
+		return nil, err
+	}
 	return statuses, nil
 }

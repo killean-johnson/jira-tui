@@ -23,11 +23,17 @@ func main() {
 	client := &api.JiraClient{}
 	client.Connect("killean.johnson@stairsupplies.com", jiraToken)
 
-	projectList, err := client.GetProjectList()
+	/* projectList, err := client.GetProjectList()
 	if err != nil {
 		fmt.Println(err)
 	}
-	MarshalPrint(projectList)
+	MarshalPrint(projectList) */
+
+	statusList, err := client.GetStatusList()
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(statusList)
 
 	/* projects, _, err := client.Project.GetList()
 	if err != nil {
