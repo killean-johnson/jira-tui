@@ -29,11 +29,23 @@ func main() {
 	}
 	MarshalPrint(projectList) */
 
-	statusList, err := client.GetStatusList()
+	/* boardsList, err := client.GetBoardList()
 	if err != nil {
 		fmt.Println(err)
 	}
-	MarshalPrint(statusList)
+	MarshalPrint(boardsList) */
+
+	sprintList, err := client.GetSprintList(6)
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(sprintList)
+
+	/* statusList, err := client.GetStatusList()
+	if err != nil {
+		fmt.Println(err)
+	}
+	MarshalPrint(statusList) */
 
 	/* projects, _, err := client.Project.GetList()
 	if err != nil {

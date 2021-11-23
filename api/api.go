@@ -39,20 +39,22 @@ func (jc *JiraClient) GetProjectList() (*jira.ProjectList, error) {
 
 // get all boards that exist on project
 // loads project from userConfig
-func (jc *JiraClient) GetBoardList() (*jira.BoardsList, error) {
+func (jc *JiraClient) GetBoardList() ([]jira.Board, error) {
 	boards, _, err := jc.client.Board.GetAllBoards(nil)
 	if err != nil {
 		return nil, err
 	}
-	return boards, nil
+	return boards.Values, nil
 }
 
-func (jc *JiraClient) GetSprintList(boardId string) ([]jira.Sprint, error) {
-	sprints, _, err := jc.client.Board.GetAllSprints(boardId)
+func (jc *JiraClient) GetSprintList(boardId int) ([]jira.Sprint, error) {
+	sprints, _, err := jc.client.Board.GetAllSprintsWithOptions(boardId, &jira.GetAllSprintsOptions{
+		State: "active",
+	})
 	if err != nil {
 		return nil, err
 	}
-	return sprints, nil
+	return sprints.Values, nil
 }
 
 // get all statuses that a jira card could be in
