@@ -112,8 +112,12 @@ func swapLayout(client * api.JiraClient, sprintId *int) func (*gocui.Gui, *gocui
         }
 
         *sprintId, _ = strconv.Atoi(strings.Split(l, "|")[0])
+        sprints, err := client.GetSprintList(*sprintId)
+        if err != nil {
+            return err
+        }
 
-        g.SetManagerFunc(issueLayout(client, sprintId))
+        g.SetManagerFunc(issueLayout(client, &sprints[0].ID))
 
         if err := keybindings(g, client, sprintId); err != nil {
             log.Panicln(err)
