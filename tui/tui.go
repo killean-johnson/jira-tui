@@ -85,15 +85,17 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 func updateIssue(activeIssue *jira.Issue, client *api.JiraClient) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
 		if activeIssue != nil {
-			fmt.Printf("Success!")
-			activeIssue.Fields.Description += "Hello, world!"
-			err := client.UpdateIssue(activeIssue)
+			err := client.UpdateIssue(&jira.Issue{
+				Key: activeIssue.Key,
+				Fields: &jira.IssueFields{
+					Description: activeIssue.Fields.Description + "Please Work",
+				},
+			})
 			if err != nil {
 				return err
 			}
 			return nil
 		}
-		fmt.Printf("Failed!")
 		return nil
 	}
 }
