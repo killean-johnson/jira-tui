@@ -21,7 +21,7 @@ func CreateGUI(client *api.JiraClient) {
 	var sprintId = new(int)
 	gui.SetManagerFunc(boardSetupLayout(client))
 
-	var activeIssue *jira.Issue
+	var activeIssue = new(jira.Issue)
 	if err := keybindings(gui, activeIssue, client, sprintId); err != nil {
 		log.Panicln(err)
 	}
@@ -87,7 +87,11 @@ func updateIssue(activeIssue *jira.Issue, client *api.JiraClient) func(*gocui.Gu
 		if activeIssue != nil {
 			fmt.Printf("Success!")
 			activeIssue.Fields.Description += "Hello, world!"
-			client.UpdateIssue(activeIssue)
+			err := client.UpdateIssue(activeIssue)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 		fmt.Printf("Failed!")
 		return nil
@@ -116,9 +120,10 @@ func selectIssue(activeIssue *jira.Issue, client *api.JiraClient) func(*gocui.Gu
 			return err
 		}
 
-        fmt.Fprintf(v, "%x\n", &activeIssue)
-		activeIssue = &*issue
-        fmt.Fprintf(v, "%x\n", &activeIssue)
+		fmt.Fprintf(v, "%x\n", &activeIssue)
+		*activeIssue = *issue
+
+		fmt.Fprintf(v, "%x\n", &activeIssue)
 
 		fmt.Fprintf(v, "ID: %s\nAssigned To %s\nDescription: %s\n", issue.ID, issue.Fields.Assignee.DisplayName, issue.Fields.Description)
 
