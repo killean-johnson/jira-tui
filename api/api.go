@@ -76,3 +76,16 @@ func (jc *JiraClient) GetIssuesForSprint(sprintId int) ([]jira.Issue, error) {
 	}
     return issues, nil
 }
+
+func (jc *JiraClient) GetIssue(issueId string) (*jira.Issue, error) {
+    issue, _, err := jc.client.Issue.Get(issueId, nil)
+    if err != nil {
+        return nil, err
+    }
+    return issue, nil
+}
+
+func (jc *JiraClient) UpdateIssue(issue *jira.Issue) error {
+    _, _, err := jc.client.Issue.Update(issue) 
+    return err
+}
