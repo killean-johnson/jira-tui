@@ -65,3 +65,14 @@ func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
 	}
 	return statuses, nil
 }
+
+// Get all the issues on a sprint
+func (jc *JiraClient) GetIssuesForSprint(sprintId int) ([]jira.Issue, error) {
+    issues, _, err := jc.client.Issue.Search("sprint = " + fmt.Sprint(sprintId), &jira.SearchOptions {
+        Fields: []string{"summary", "status"},
+    })
+	if err != nil {
+		return nil, err
+	}
+    return issues, nil
+}
