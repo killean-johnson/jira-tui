@@ -7,6 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/killean-johnson/jira-tui/api"
+	"github.com/killean-johnson/jira-tui/tui"
 )
 
 func MarshalPrint(obj interface{}) {
@@ -23,23 +24,37 @@ func main() {
 	client := &api.JiraClient{}
 	client.Connect("killean.johnson@stairsupplies.com", jiraToken)
 
+    tui.CreateGUI(client)
+    return 
+
 	/* projectList, err := client.GetProjectList()
 	if err != nil {
 		fmt.Println(err)
 	}
 	MarshalPrint(projectList) */
 
-	/* boardsList, err := client.GetBoardList()
-	if err != nil {
-		fmt.Println(err)
-	}
-	MarshalPrint(boardsList) */
+    //var boardIndex int
+	// boardsList, err := client.GetBoardList()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	//MarshalPrint(boardsList)
 
+    //var sprintIndex int
 	sprintList, err := client.GetSprintList(6)
 	if err != nil {
 		fmt.Println(err)
 	}
-	MarshalPrint(sprintList)
+	//MarshalPrint(sprintList)
+
+    issues, err := client.GetIssuesForSprint(sprintList[0].ID)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+    for _, is := range(issues) {
+        fmt.Printf("%s | %s\n", is.Key, is.Fields.Summary)
+    }
 
 	/* statusList, err := client.GetStatusList()
 	if err != nil {
