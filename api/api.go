@@ -69,7 +69,7 @@ func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
 // Get all the issues on a sprint
 func (jc *JiraClient) GetIssuesForSprint(sprintId int) ([]jira.Issue, error) {
     issues, _, err := jc.client.Issue.Search("Sprint=" + fmt.Sprint(sprintId), &jira.SearchOptions {
-        Fields: []string{"summary", "status"},
+        Fields: []string{"summary", "status", "assignee"},
     })
 	if err != nil {
 		return nil, err
@@ -87,5 +87,18 @@ func (jc *JiraClient) GetIssue(issueId string) (*jira.Issue, error) {
 
 func (jc *JiraClient) UpdateIssue(issue *jira.Issue) error {
     _, _, err := jc.client.Issue.Update(issue) 
+    return err
+}
+
+func (jc *JiraClient) DoTransition(issueKey string, transitionName string) error {
+    var transitionId string
+    transitions, _, _ := jc.client.Issue.GetTransitions(issueKey)
+    for _, t := range(transitions) {
+        if t.Name == transitionName {
+            transitionId = t.ID
+            break
+        }
+    }
+    _, err := jc.client.Issue.DoTransition(issueKey, transitionId)
     return err
 }
