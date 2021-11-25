@@ -51,7 +51,7 @@ func (bl *BoardLayout) boardLayoutKeybindings() error {
 	if err := bl.gui.SetKeybinding("boardlist", 'k', gocui.ModNone, cursorUp); err != nil {
 		return err
 	}
-	if err := bl.gui.SetKeybinding("", 'q', gocui.ModNone, boardQuit); err != nil {
+	if err := bl.gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, boardQuit); err != nil {
 		return err
 	}
 	return nil
