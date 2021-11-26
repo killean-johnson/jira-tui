@@ -78,7 +78,7 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     go func(il *IssueLayout, g *gocui.Gui) {
         for {
             // Sleep for some time
-            time.Sleep(time.Second * 15)
+            time.Sleep(time.Second * 5)
             // Update the current issues
             issues, err := il.client.GetIssuesForSprint(il.sprintId)
             if err == nil {

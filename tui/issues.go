@@ -27,6 +27,11 @@ func (il *IssueLayout) getLocalIssueUtil(key string) *jira.Issue {
 }
 
 func (il *IssueLayout) redrawIssueList(g *gocui.Gui) error {
+    curView := g.CurrentView()
+    if curView.Name() != "issuelist" {
+        return nil
+    }
+
     issueView, err := g.SetCurrentView("issuelist")
     if err != nil {
         return err
