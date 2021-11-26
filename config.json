@@ -1,0 +1,32 @@
+{
+    "keybindings": {
+        "board": {
+            "boardlist": [
+                {
+                    "key": "j",
+                    "description": "Cursor Down"
+                },
+                {
+                    "key": "k",
+                    "description": "Cursor Up"
+                }
+            ],
+            "": []
+        },
+        "issue": {
+            "issuelist": [
+                {
+                    "key": "j",
+                    "description": "Cursor Down"
+                },
+                {
+                    "key": "k",
+                    "description": "Cursor Up"
+                }
+            ],
+            "issueview": [],
+            "editdesc": [],
+            "": []
+        }
+    }
+}
