@@ -26,7 +26,7 @@ func (il *IssueLayout) getLocalIssueUtil(key string) *jira.Issue {
     return nil
 }
 
-func (il *IssueLayout) redrawIssueList(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) redrawIssueList(g *gocui.Gui) error {
     issueView, err := g.SetCurrentView("issuelist")
     if err != nil {
         return err
@@ -36,20 +36,27 @@ func (il *IssueLayout) redrawIssueList(g *gocui.Gui, v *gocui.View) error {
 
     // Set up the issue list
     issueListWidth := maxX / 3 * 2 - 1
+    issueTextWidth := issueListWidth / 3 * 2
+    titleIssueTextWidth := issueListWidth / 3 * 2 - 9
+    issueInfoWidth := issueListWidth / 3
+    issueView.Title = fmt.Sprintf("%-5s | %-" + fmt.Sprint(titleIssueTextWidth) + "s | %-20s | %-12s", "Key", "Issue", "Assignee", "Status")
 
-    issueTextWidth := fmt.Sprint(issueListWidth / 3 * 2)
-    issueInfoWidth := fmt.Sprint(issueListWidth / 3)
     for _, is := range il.issueList {
         var issueText, issueInfo string
-        if is.Fields.Assignee != nil {
-            issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
-            issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+
+        if len(is.Fields.Summary) + 9 > issueTextWidth {
+            issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary[:issueTextWidth - 9])
         } else {
             issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+        }
+
+        if is.Fields.Assignee != nil {
+            issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+        } else {
             issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.StatusCategory.Name)
         }
 
-        fmt.Fprintf(issueView, "%-" + issueTextWidth + "s | %-" + issueInfoWidth + "s\n", issueText, issueInfo)
+        fmt.Fprintf(issueView, "%-" + fmt.Sprint(issueTextWidth) + "s | %-" + fmt.Sprint(issueInfoWidth) + "s\n", issueText, issueInfo)
     }
 
     if _, err := g.SetCurrentView("issuelist"); err != nil {
@@ -224,7 +231,7 @@ func (il *IssueLayout) changeStatus(g *gocui.Gui, v *gocui.View) error {
 
         il.activeIssue.Fields.Status.StatusCategory = newStatus
 
-        il.redrawIssueList(g, v)
+        il.redrawIssueList(g)
     }
 	if err := g.DeleteView("editstatus"); err != nil {
 		return err
