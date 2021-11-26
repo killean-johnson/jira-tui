@@ -99,6 +99,16 @@
             "view": "editstatus",
             "keys": [
                 {
+                    "name": "escursordown",
+                    "key": "j",
+                    "description": "Cursor Down"
+                },
+                {
+                    "name": "escursorup",
+                    "key": "k",
+                    "description": "Cursor Up"
+                },
+                {
                     "name": "essetstatus",
                     "key": "<ENTER>",
                     "description": "Set Status"

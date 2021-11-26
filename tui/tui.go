@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jroimartin/gocui"
@@ -27,6 +28,31 @@ func CreateTUI(client *api.JiraClient, conf *config.Config) {
     bl.keymap["blselect"] = bl.switchToIssueLayout
     bl.keymap["blquit"] = boardQuit
 
+    var helpbar = make(chan string)
+    bl.helpbar = &helpbar
+
+    go func(hb chan string, gui *gocui.Gui) error {
+        for {
+            var helptext = <-hb
+            curView := gui.CurrentView()
+            maxX, maxY := gui.Size()
+            v, err := gui.SetView("helpbar", 0, maxY - 3, maxX - 1, maxY - 1)
+            if err != nil && err != gocui.ErrUnknownView {
+                panic(err)
+            } else if err == gocui.ErrUnknownView {
+                v.Title = "Keybindings"
+            }
+            gui.SetViewOnTop(v.Name())
+
+            v.Clear()
+            fmt.Fprintf(v, "%s", helptext)
+
+            if curView != nil {
+                gui.SetCurrentView(curView.Name())
+            }
+        }
+    }(helpbar, gui)
+
     gui.SetManagerFunc(bl.Layout)
 
 	if err := bl.boardLayoutKeybindings(); err != nil {
@@ -36,6 +62,32 @@ func CreateTUI(client *api.JiraClient, conf *config.Config) {
 	if err := gui.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
+}
+
+func updateHelpbar(helpbar chan string, gui *gocui.Gui, conf *config.Config) {
+    curView := gui.CurrentView()
+
+    if curView != nil {
+        helpString := ""
+        for _, l := range(conf.Board) {
+            if l.View == curView.Name() {
+                for _, key := range(l.Keys) {
+                    helpString += fmt.Sprintf("|%s - %s |", key.Key, key.Description)
+                }
+                break
+            }
+        }
+
+        for _, l := range(conf.Issue) {
+            if l.View == curView.Name() {
+                for _, key := range(l.Keys) {
+                    helpString += fmt.Sprintf("|%s - %s |", key.Key, key.Description)
+                }
+                break
+            }
+        }
+        helpbar <- helpString
+    }
 }
 
 func cursorUp(g *gocui.Gui, v *gocui.View) error {

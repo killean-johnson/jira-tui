@@ -19,6 +19,7 @@ type BoardLayout struct {
 	client *api.JiraClient
     config *config.Config
     keymap map[string]func(*gocui.Gui,*gocui.View) error
+    helpbar *chan string
 }
 
 func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
@@ -46,14 +47,18 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.keymap["ilcursorup"] = cursorUp
     il.keymap["ilselectissue"] = il.selectIssue
     il.keymap["ileditdescription"] = il.editDescription
-    il.keymap["ilchangestatus"] = il.changeStatus
+    il.keymap["ilchangestatus"] = il.editStatus
     il.keymap["ilquit"] = issueQuit
     il.keymap["ivcursordown"] = cursorDown
     il.keymap["ivcursorup"] = cursorUp
     il.keymap["edsavechanges"] = il.changeDescription
     il.keymap["edcancel"] = il.exitEditDescription
+    il.keymap["escursordown"] = cursorDown
+    il.keymap["escursorup"] = cursorUp
     il.keymap["essetstatus"] = il.changeStatus
     il.keymap["escancel"] = il.exitEditStatus
+
+    il.helpbar = bl.helpbar
 
 	// Get the issues
 	issues, err := il.client.GetIssuesForSprint(il.sprintId)
@@ -143,12 +148,17 @@ func (bl *BoardLayout) boardLayoutKeybindings() error {
             }
         }
     }
+
+    if err := bl.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, boardQuit); err != nil {
+        return err
+    }
+
 	return nil
 }
 
 func (bl *BoardLayout) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("boardlist", 0, 0, maxX-1, maxY-1); err != nil {
+	if v, err := g.SetView("boardlist", 0, 0, maxX-1, maxY-4); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -172,7 +182,10 @@ func (bl *BoardLayout) Layout(g *gocui.Gui) error {
 		if _, err := g.SetCurrentView("boardlist"); err != nil {
 			return err
 		}
+
+        updateHelpbar(*bl.helpbar, g, bl.config)
 	}
+
 	return nil
 }
 
