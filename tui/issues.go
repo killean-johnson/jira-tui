@@ -17,6 +17,47 @@ type IssueLayout struct {
 	sprintId    int
 }
 
+func (il *IssueLayout) getLocalIssueUtil(key string) *jira.Issue {
+    for _, issue := range(il.issueList) {
+        if issue.Key == key {
+            return &issue
+        }
+    }
+    return nil
+}
+
+func (il *IssueLayout) redrawIssueList(g *gocui.Gui, v *gocui.View) error {
+    issueView, err := g.SetCurrentView("issuelist")
+    if err != nil {
+        return err
+    }
+    issueView.Clear()
+	maxX, _ := g.Size()
+
+    // Set up the issue list
+    issueListWidth := maxX / 3 * 2 - 1
+
+    issueTextWidth := fmt.Sprint(issueListWidth / 3 * 2)
+    issueInfoWidth := fmt.Sprint(issueListWidth / 3)
+    for _, is := range il.issueList {
+        var issueText, issueInfo string
+        if is.Fields.Assignee != nil {
+            issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+            issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+        } else {
+            issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+            issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.StatusCategory.Name)
+        }
+
+        fmt.Fprintf(issueView, "%-" + issueTextWidth + "s | %-" + issueInfoWidth + "s\n", issueText, issueInfo)
+    }
+
+    if _, err := g.SetCurrentView("issuelist"); err != nil {
+        return err
+    }
+    return nil
+}
+
 func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
     // Get the string from the currently highlighted line
 	var l string
@@ -35,13 +76,7 @@ func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
 
     // Match the ID from the string up with the one in our issue list
 	id := strings.Trim(strings.Split(l, "|")[0], " ")
-    var foundIssue *jira.Issue
-    for _, issue := range(il.issueList) {
-        if issue.Key == id {
-            foundIssue = &issue
-            break
-        }
-    }
+    var foundIssue *jira.Issue = il.getLocalIssueUtil(id)
 
     // Do nothing if the issue wasn't found
     if foundIssue == nil {
@@ -88,15 +123,21 @@ func (il *IssueLayout) editDescription(g *gocui.Gui, v *gocui.View) error {
 
 func (il *IssueLayout) changeDescription(g *gocui.Gui, v *gocui.View) error {
 	if il.activeIssue != nil {
+        buf := v.Buffer()
 		err := il.client.UpdateIssue(&jira.Issue{
 			Key: il.activeIssue.Key,
 			Fields: &jira.IssueFields{
-				Description: v.Buffer(),
+				Description: buf,
 			},
 		})
 		if err != nil {
 			return err
 		}
+
+        localIssue := il.getLocalIssueUtil(il.activeIssue.Key)
+        if localIssue != nil {
+            localIssue.Fields.Description = buf
+        }
 	}
 	if err := g.DeleteView("editdesc"); err != nil {
 		return err
@@ -162,10 +203,12 @@ func (il *IssueLayout) changeStatus(g *gocui.Gui, v *gocui.View) error {
             l = ""
         }
 
+        var newStatus jira.StatusCategory
         var newStatusId string
         for _, status := range(statuses) {
             if status.Name == l {
                 newStatusId = fmt.Sprint(status.Name)
+                newStatus = status
                 break
             }
         }
@@ -178,6 +221,10 @@ func (il *IssueLayout) changeStatus(g *gocui.Gui, v *gocui.View) error {
         if err != nil {
             return err
         }
+
+        il.activeIssue.Fields.Status.StatusCategory = newStatus
+
+        il.redrawIssueList(g, v)
     }
 	if err := g.DeleteView("editstatus"); err != nil {
 		return err
@@ -208,10 +255,10 @@ func (il *IssueLayout) issueLayoutKeybindings() error {
 	if err := il.gui.SetKeybinding("issuelist", gocui.KeyEnter, gocui.ModNone, il.selectIssue); err != nil {
 		return err
 	}
-	if err := il.gui.SetKeybinding("issuelist", gocui.KeyCtrlD, gocui.ModNone, il.editDescription); err != nil {
+	if err := il.gui.SetKeybinding("issuelist", 'd', gocui.ModNone, il.editDescription); err != nil {
 		return err
 	}
-    if err := il.gui.SetKeybinding("issuelist", gocui.KeyCtrlS, gocui.ModNone, il.editStatus); err != nil {
+    if err := il.gui.SetKeybinding("issuelist", 's', gocui.ModNone, il.editStatus); err != nil {
         return err
     }
 	if err := il.gui.SetKeybinding("issueview", 'j', gocui.ModNone, cursorDown); err != nil {
@@ -223,13 +270,13 @@ func (il *IssueLayout) issueLayoutKeybindings() error {
 	if err := il.gui.SetKeybinding("editdesc", gocui.KeyCtrlS, gocui.ModNone, il.changeDescription); err != nil {
 		return err
 	}
-	if err := il.gui.SetKeybinding("editdesc", gocui.KeyCtrlX, gocui.ModNone, il.exitEditDescription); err != nil {
+	if err := il.gui.SetKeybinding("editdesc", gocui.KeyEsc, gocui.ModNone, il.exitEditDescription); err != nil {
 		return err
 	}
 	if err := il.gui.SetKeybinding("editstatus", gocui.KeyEnter, gocui.ModNone, il.changeStatus); err != nil {
 		return err
 	}
-	if err := il.gui.SetKeybinding("editstatus", gocui.KeyCtrlX, gocui.ModNone, il.exitEditStatus); err != nil {
+	if err := il.gui.SetKeybinding("editstatus", gocui.KeyEsc, gocui.ModNone, il.exitEditStatus); err != nil {
 		return err
 	}
 	if err := il.gui.SetKeybinding("editstatus", 'j', gocui.ModNone, cursorDown); err != nil {
@@ -238,7 +285,10 @@ func (il *IssueLayout) issueLayoutKeybindings() error {
 	if err := il.gui.SetKeybinding("editstatus", 'k', gocui.ModNone, cursorUp); err != nil {
 		return err
 	}
-	if err := il.gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, issueQuit); err != nil {
+	if err := il.gui.SetKeybinding("issuelist", 'q', gocui.ModNone, issueQuit); err != nil {
+		return err
+	}
+	if err := il.gui.SetKeybinding("issueview", 'q', gocui.ModNone, issueQuit); err != nil {
 		return err
 	}
 	return nil
@@ -257,25 +307,9 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
 		v.Title = "Issue View"
 	}
 
-
-    // Set up the issue info column
-    if v, err := g.SetView("issueinfo", maxX/2 - 9, 0, maxX/3*2-1, maxY-1); err != nil {
-        if err != gocui.ErrUnknownView {
-            return err
-        }
-        v.Title = "Issue Info"
-
-		for _, is := range il.issueList {
-			if is.Fields.Assignee != nil {
-				fmt.Fprintf(v, "%s | %s\n", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
-			} else {
-				fmt.Fprintf(v, "%s | %s\n", "Unassigned", is.Fields.Status.StatusCategory.Name)
-			}
-		}
-    }
-
     // Set up the issue list
-	if v, err := g.SetView("issuelist", 0, 0, maxX/2 - 10, maxY-1); err != nil {
+    issueListWidth := maxX / 3 * 2 - 1
+	if v, err := g.SetView("issuelist", 0, 0, issueListWidth, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -285,12 +319,19 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
 		v.SelFgColor = gocui.ColorBlack
 		v.Title = "Issue List"
 
+        issueTextWidth := fmt.Sprint(issueListWidth / 3 * 2)
+        issueInfoWidth := fmt.Sprint(issueListWidth / 3)
 		for _, is := range il.issueList {
-			if is.Fields.Assignee != nil {
-				fmt.Fprintf(v, "%s | %s\n", is.Key, is.Fields.Summary)
-			} else {
-				fmt.Fprintf(v, "%s | %s\n", is.Key, is.Fields.Summary)
-			}
+            var issueText, issueInfo string
+            if is.Fields.Assignee != nil {
+                issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+                issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+            } else {
+                issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+                issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.StatusCategory.Name)
+            }
+
+            fmt.Fprintf(v, "%-" + issueTextWidth + "s | %-" + issueInfoWidth + "s\n", issueText, issueInfo)
 		}
 
 		if _, err := g.SetCurrentView("issuelist"); err != nil {

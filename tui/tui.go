@@ -14,6 +14,8 @@ func CreateGUI(client *api.JiraClient) {
 	}
 	defer gui.Close()
 
+    gui.InputEsc = true
+
     var bl *BoardLayout = new(BoardLayout)
     bl.client = client
     bl.gui = gui
