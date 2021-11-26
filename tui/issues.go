@@ -309,6 +309,9 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
 
     // Set up the issue list
     issueListWidth := maxX / 3 * 2 - 1
+    issueTextWidth := issueListWidth / 3 * 2
+    titleIssueTextWidth := issueListWidth / 3 * 2 - 9
+    issueInfoWidth := issueListWidth / 3
 	if v, err := g.SetView("issuelist", 0, 0, issueListWidth, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -317,21 +320,24 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
 		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
-		v.Title = "Issue List"
+		v.Title = fmt.Sprintf("%-5s | %-" + fmt.Sprint(titleIssueTextWidth) + "s | %-20s | %-12s", "Key", "Issue", "Assignee", "Status")
 
-        issueTextWidth := fmt.Sprint(issueListWidth / 3 * 2)
-        issueInfoWidth := fmt.Sprint(issueListWidth / 3)
 		for _, is := range il.issueList {
             var issueText, issueInfo string
-            if is.Fields.Assignee != nil {
-                issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
-                issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+
+            if len(is.Fields.Summary) + 9 > issueTextWidth {
+                issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary[:issueTextWidth - 9])
             } else {
                 issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+            }
+
+            if is.Fields.Assignee != nil {
+                issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+            } else {
                 issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.StatusCategory.Name)
             }
 
-            fmt.Fprintf(v, "%-" + issueTextWidth + "s | %-" + issueInfoWidth + "s\n", issueText, issueInfo)
+            fmt.Fprintf(v, "%-" + fmt.Sprint(issueTextWidth) + "s | %-" + fmt.Sprint(issueInfoWidth) + "s\n", issueText, issueInfo)
 		}
 
 		if _, err := g.SetCurrentView("issuelist"); err != nil {
