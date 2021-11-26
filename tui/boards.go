@@ -29,23 +29,23 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 
-	var issueInfo *IssueLayout = new(IssueLayout)
-    issueInfo.gui = bl.gui
-	issueInfo.client = bl.client
-	issueInfo.sprintId = sprints[0].ID
+	var il *IssueLayout = new(IssueLayout)
+    il.gui = bl.gui
+	il.client = bl.client
+	il.sprintId = sprints[0].ID
 
 	// Get the issues
-	issues, err := issueInfo.client.GetIssuesForSprint(issueInfo.sprintId)
+	issues, err := il.client.GetIssuesForSprint(il.sprintId)
 	if err != nil {
 		return err
 	}
 
     // TODO: Maybe find some way to have this not be a large copy operation
-    issueInfo.issueList = issues
+    il.issueList = issues
 
-	bl.gui.SetManagerFunc(issueInfo.issueLayout)
+	bl.gui.SetManagerFunc(il.issueLayout)
 
-	if err := issueInfo.issueLayoutKeybindings(); err != nil {
+	if err := il.issueLayoutKeybindings(); err != nil {
 		log.Panicln(err)
 	}
 	return nil
@@ -67,7 +67,7 @@ func (bl *BoardLayout) boardLayoutKeybindings() error {
 	return nil
 }
 
-func (bl *BoardLayout) boardLayoutfunc(g *gocui.Gui) error {
+func (bl *BoardLayout) boardLayout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	if v, err := g.SetView("boardlist", 0, 0, maxX-1, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {

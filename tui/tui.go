@@ -20,7 +20,7 @@ func CreateGUI(client *api.JiraClient) {
     bl.client = client
     bl.gui = gui
 
-	gui.SetManagerFunc(bl.boardLayoutfunc)
+	gui.SetManagerFunc(bl.boardLayout)
 
 	if err := bl.boardLayoutKeybindings(); err != nil {
 		log.Panicln(err)
