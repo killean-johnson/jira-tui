@@ -33,6 +33,16 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     issueInfo.gui = bl.gui
 	issueInfo.client = bl.client
 	issueInfo.sprintId = sprints[0].ID
+
+	// Get the issues
+	issues, err := issueInfo.client.GetIssuesForSprint(issueInfo.sprintId)
+	if err != nil {
+		return err
+	}
+
+    // TODO: Maybe find some way to have this not be a large copy operation
+    issueInfo.issueList = issues
+
 	bl.gui.SetManagerFunc(issueInfo.issueLayout)
 
 	if err := issueInfo.issueLayoutKeybindings(); err != nil {

@@ -13,10 +13,12 @@ type IssueLayout struct {
 	gui         *gocui.Gui
 	client      *api.JiraClient
 	activeIssue *jira.Issue
+    issueList   []jira.Issue
 	sprintId    int
 }
 
 func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
+    // Get the string from the currently highlighted line
 	var l string
 	var err error
 
@@ -31,20 +33,32 @@ func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
 
 	v.Clear()
 
+    // Match the ID from the string up with the one in our issue list
 	id := strings.Trim(strings.Split(l, "|")[0], " ")
-	issue, err := il.client.GetIssue(id)
-	if err != nil {
-		return err
-	}
+    var foundIssue *jira.Issue
+    for _, issue := range(il.issueList) {
+        if issue.Key == id {
+            foundIssue = &issue
+            break
+        }
+    }
 
-	il.activeIssue = issue
+    // Do nothing if the issue wasn't found
+    if foundIssue == nil {
+        return nil
+    }
 
-	if issue.Fields.Assignee != nil {
-		fmt.Fprintf(v, "ID: %s\nAssigned To %s\nDescription: %s\n", issue.ID, issue.Fields.Assignee.DisplayName, issue.Fields.Description)
+    // Update our actively selected issue
+	il.activeIssue = foundIssue
+
+    // Display the issue information in the issueinfo view
+	if foundIssue.Fields.Assignee != nil {
+		fmt.Fprintf(v, "ID: %s\nAssigned To %s\nDescription: %s\n", foundIssue.ID, foundIssue.Fields.Assignee.DisplayName, foundIssue.Fields.Description)
 	} else {
-		fmt.Fprintf(v, "ID: %s\nUnassigned\nDescription: %s\n", issue.ID, issue.Fields.Description)
+		fmt.Fprintf(v, "ID: %s\nUnassigned\nDescription: %s\n", foundIssue.ID, foundIssue.Fields.Description)
 	}
 
+    // Return to the issuelist view
 	if _, err := g.SetCurrentView("issuelist"); err != nil {
 		return err
 	}
@@ -243,11 +257,6 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
 		v.Title = "Issue View"
 	}
 
-	// Get the issues
-	issues, err := il.client.GetIssuesForSprint(il.sprintId)
-	if err != nil {
-		return err
-	}
 
     // Set up the issue info column
     if v, err := g.SetView("issueinfo", maxX/2 - 9, 0, maxX/3*2-1, maxY-1); err != nil {
@@ -256,7 +265,7 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
         }
         v.Title = "Issue Info"
 
-		for _, is := range issues {
+		for _, is := range il.issueList {
 			if is.Fields.Assignee != nil {
 				fmt.Fprintf(v, "%s | %s\n", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
 			} else {
@@ -276,7 +285,7 @@ func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
 		v.SelFgColor = gocui.ColorBlack
 		v.Title = "Issue List"
 
-		for _, is := range issues {
+		for _, is := range il.issueList {
 			if is.Fields.Assignee != nil {
 				fmt.Fprintf(v, "%s | %s\n", is.Key, is.Fields.Summary)
 			} else {
