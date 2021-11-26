@@ -70,6 +70,26 @@ func (il *IssueLayout) redrawIssueList(g *gocui.Gui) error {
     return nil
 }
 
+func (il *IssueLayout) createIssue(g *gocui.Gui, v *gocui.View) error {
+    i := jira.Issue {
+        Fields: &jira.IssueFields {
+            Description: "Test Issue",
+            Type: jira.IssueType {
+                Name: "Bug",
+            },
+            Project: il.activeIssue.Fields.Project,
+            Summary: "Just A Test Issue",
+        },
+    }
+    
+    _, err := il.client.CreateIssue(&i)
+    if err != nil {
+        panic(err)
+    }
+
+    return nil
+}
+
 func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
     // Get the string from the currently highlighted line
 	var l string
@@ -273,6 +293,9 @@ func (il *IssueLayout) issueLayoutKeybindings() error {
     if err := il.gui.SetKeybinding("issuelist", 's', gocui.ModNone, il.editStatus); err != nil {
         return err
     }
+    // if err := il.gui.SetKeybinding("issuelist", 'a', gocui.ModNone, il.createIssue); err != nil {
+    //     return err
+    // }
 	if err := il.gui.SetKeybinding("issueview", 'j', gocui.ModNone, cursorDown); err != nil {
 		return err
 	}

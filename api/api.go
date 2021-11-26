@@ -69,7 +69,7 @@ func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
 // Get all the issues on a sprint
 func (jc *JiraClient) GetIssuesForSprint(sprintId int) ([]jira.Issue, error) {
     issues, _, err := jc.client.Issue.Search("Sprint=" + fmt.Sprint(sprintId), &jira.SearchOptions {
-        Fields: []string{"summary", "status", "assignee", "description"},
+        Fields: []string{"summary", "status", "assignee", "description", "sprint", "project"},
     })
 	if err != nil {
 		return nil, err
@@ -101,4 +101,33 @@ func (jc *JiraClient) DoTransition(issueKey string, transitionName string) error
     }
     _, err := jc.client.Issue.DoTransition(issueKey, transitionId)
     return err
+}
+
+func (jc *JiraClient) CreateIssue(issue *jira.Issue) (*jira.Issue, error) {
+    is, _, err := jc.client.Issue.Create(issue)
+    if err != nil {
+        return nil, err
+    }
+
+    activeSprint, err := jc.GetActiveSprint()
+    if err != nil {
+        return nil, err
+    }
+
+    _, err = jc.client.Sprint.MoveIssuesToSprint(activeSprint.ID, []string{is.Key})
+    if err != nil {
+        return nil, err
+    }
+
+    return is, nil
+}
+
+func (jc *JiraClient) GetActiveSprint() (*jira.Sprint, error) {
+    sprints, _, err := jc.client.Board.GetAllSprintsWithOptions(6, &jira.GetAllSprintsOptions{ 
+        State: "active",
+    })
+    if err != nil {
+        return nil, err
+    }
+    return &sprints.Values[0], nil
 }
