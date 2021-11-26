@@ -72,7 +72,7 @@ func updateHelpbar(helpbar chan string, gui *gocui.Gui, conf *config.Config) {
         for _, l := range(conf.Board) {
             if l.View == curView.Name() {
                 for _, key := range(l.Keys) {
-                    helpString += fmt.Sprintf("|%s - %s |", key.Key, key.Description)
+                    helpString += fmt.Sprintf("| %s - %s |", key.Key, key.Description)
                 }
                 break
             }
@@ -81,7 +81,7 @@ func updateHelpbar(helpbar chan string, gui *gocui.Gui, conf *config.Config) {
         for _, l := range(conf.Issue) {
             if l.View == curView.Name() {
                 for _, key := range(l.Keys) {
-                    helpString += fmt.Sprintf("|%s - %s |", key.Key, key.Description)
+                    helpString += fmt.Sprintf("| %s - %s |", key.Key, key.Description)
                 }
                 break
             }
