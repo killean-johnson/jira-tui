@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/andygrunwald/go-jira"
 )
@@ -11,14 +10,14 @@ type JiraClient struct {
 	client *jira.Client
 }
 
-func (jc *JiraClient) Connect(username string, token string) {
+func (jc *JiraClient) Connect(username string, token string, url string) {
 	// Set up client
 	authTransport := jira.BasicAuthTransport{
 		Username: username,
 		Password: token,
 	}
 
-	client, err := jira.NewClient(authTransport.Client(), os.Getenv("JIRA_BOARD_URL"))
+	client, err := jira.NewClient(authTransport.Client(), url)
 
 	if err != nil {
 		fmt.Println("ERR IN createClient FUNC")

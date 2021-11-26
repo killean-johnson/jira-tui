@@ -7,6 +7,7 @@ import (
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
+	"github.com/killean-johnson/jira-tui/config"
 )
 
 type IssueLayout struct {
@@ -15,6 +16,8 @@ type IssueLayout struct {
 	activeIssue *jira.Issue
     issueList   []jira.Issue
 	sprintId    int
+    config *config.Config
+    keymap map[string]func(*gocui.Gui, *gocui.View) error
 }
 
 func (il *IssueLayout) getLocalIssueUtil(key string) *jira.Issue {
@@ -278,58 +281,39 @@ func (il *IssueLayout) exitEditStatus(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (il *IssueLayout) issueLayoutKeybindings() error {
-	if err := il.gui.SetKeybinding("issuelist", 'j', gocui.ModNone, cursorDown); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("issuelist", 'k', gocui.ModNone, cursorUp); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("issuelist", gocui.KeyEnter, gocui.ModNone, il.selectIssue); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("issuelist", 'd', gocui.ModNone, il.editDescription); err != nil {
-		return err
-	}
-    if err := il.gui.SetKeybinding("issuelist", 's', gocui.ModNone, il.editStatus); err != nil {
-        return err
+    for _, view := range(il.config.Issue) {
+        for _, key := range(view.Keys) {
+            if len(key.Key) > 1 {
+                var keySet gocui.Key
+
+                if strings.Contains(key.Key, "<C-") {
+                    char := key.Key[3]
+                    var val int = int(char) - 96
+                    keySet = gocui.Key(val)
+                } else {
+                    switch key.Key { 
+                    case "<ENTER>":
+                        keySet = gocui.KeyEnter
+                    case "<ESCAPE>":
+                        keySet = gocui.KeyEsc
+                    }
+                }
+
+                if err := il.gui.SetKeybinding(view.View, keySet, gocui.ModNone, il.keymap[key.Name]); err != nil {
+                    return err
+                }
+            } else {
+                if err := il.gui.SetKeybinding(view.View, rune(key.Key[0]), gocui.ModNone, il.keymap[key.Name]); err != nil {
+                    return err
+                }
+            }
+        }
     }
-    // if err := il.gui.SetKeybinding("issuelist", 'a', gocui.ModNone, il.createIssue); err != nil {
-    //     return err
-    // }
-	if err := il.gui.SetKeybinding("issueview", 'j', gocui.ModNone, cursorDown); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("issueview", 'k', gocui.ModNone, cursorUp); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("editdesc", gocui.KeyCtrlS, gocui.ModNone, il.changeDescription); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("editdesc", gocui.KeyEsc, gocui.ModNone, il.exitEditDescription); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("editstatus", gocui.KeyEnter, gocui.ModNone, il.changeStatus); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("editstatus", gocui.KeyEsc, gocui.ModNone, il.exitEditStatus); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("editstatus", 'j', gocui.ModNone, cursorDown); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("editstatus", 'k', gocui.ModNone, cursorUp); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("issuelist", 'q', gocui.ModNone, issueQuit); err != nil {
-		return err
-	}
-	if err := il.gui.SetKeybinding("issueview", 'q', gocui.ModNone, issueQuit); err != nil {
-		return err
-	}
+
 	return nil
 }
 
-func (il *IssueLayout) issueLayout(g *gocui.Gui) error {
+func (il *IssueLayout) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	if v, err := g.SetView("issueview", maxX/3*2, 0, maxX-1, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {

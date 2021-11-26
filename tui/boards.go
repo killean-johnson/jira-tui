@@ -11,11 +11,14 @@ import (
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
+	"github.com/killean-johnson/jira-tui/config"
 )
 
 type BoardLayout struct {
 	gui    *gocui.Gui
 	client *api.JiraClient
+    config *config.Config
+    keymap map[string]func(*gocui.Gui,*gocui.View) error
 }
 
 func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
@@ -36,6 +39,21 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.gui = bl.gui
 	il.client = bl.client
 	il.sprintId = sprints[0].ID
+    il.config = bl.config
+
+    il.keymap = make(map[string]func(*gocui.Gui, *gocui.View) error)
+    il.keymap["ilcursordown"] = cursorDown
+    il.keymap["ilcursorup"] = cursorUp
+    il.keymap["ilselectissue"] = il.selectIssue
+    il.keymap["ileditdescription"] = il.editDescription
+    il.keymap["ilchangestatus"] = il.changeStatus
+    il.keymap["ilquit"] = issueQuit
+    il.keymap["ivcursordown"] = cursorDown
+    il.keymap["ivcursorup"] = cursorUp
+    il.keymap["edsavechanges"] = il.changeDescription
+    il.keymap["edcancel"] = il.exitEditDescription
+    il.keymap["essetstatus"] = il.changeStatus
+    il.keymap["escancel"] = il.exitEditStatus
 
 	// Get the issues
 	issues, err := il.client.GetIssuesForSprint(il.sprintId)
@@ -72,7 +90,7 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     // TODO: Maybe find some way to have this not be a large copy operation
     il.issueList = issues
 
-	bl.gui.SetManagerFunc(il.issueLayout)
+	bl.gui.SetManagerFunc(il.Layout)
 
     // Start issue update goroutine
     go func(il *IssueLayout, g *gocui.Gui) {
@@ -95,23 +113,40 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+
 func (bl *BoardLayout) boardLayoutKeybindings() error {
-	if err := bl.gui.SetKeybinding("boardlist", gocui.KeyEnter, gocui.ModNone, bl.switchToIssueLayout); err != nil {
-		return err
-	}
-	if err := bl.gui.SetKeybinding("boardlist", 'j', gocui.ModNone, cursorDown); err != nil {
-		return err
-	}
-	if err := bl.gui.SetKeybinding("boardlist", 'k', gocui.ModNone, cursorUp); err != nil {
-		return err
-	}
-	if err := bl.gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, boardQuit); err != nil {
-		return err
-	}
+    for _, view := range(bl.config.Board) {
+        for _, key := range(view.Keys) {
+            if len(key.Key) > 1 {
+                var keySet gocui.Key
+
+                if strings.Contains(key.Key, "<C-") {
+                    char := key.Key[3]
+                    var val int = int(char) - 96
+                    keySet = gocui.Key(val)
+                } else {
+                    switch key.Key { 
+                    case "<ENTER>":
+                        keySet = gocui.KeyEnter
+                    case "<ESCAPE>":
+                        keySet = gocui.KeyEsc
+                    }
+                }
+
+                if err := bl.gui.SetKeybinding(view.View, keySet, gocui.ModNone, bl.keymap[key.Name]); err != nil {
+                    return err
+                }
+            } else {
+                if err := bl.gui.SetKeybinding(view.View, rune(key.Key[0]), gocui.ModNone, bl.keymap[key.Name]); err != nil {
+                    return err
+                }
+            }
+        }
+    }
 	return nil
 }
 
-func (bl *BoardLayout) boardLayout(g *gocui.Gui) error {
+func (bl *BoardLayout) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	if v, err := g.SetView("boardlist", 0, 0, maxX-1, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {

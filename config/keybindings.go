@@ -4,29 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jroimartin/gocui"
 	"github.com/spf13/viper"
 )
 
-type ConfigStruct struct {
-    Layouts map[string]LayoutStruct
+type Config struct {
+    Email string
+    APIToken string
+    JiraURL string
+    Board []LayoutStruct
+    Issue []LayoutStruct
 }
 
 type LayoutStruct struct {
-    Views map[string]ViewStruct
-}
-
-type ViewStruct struct {
-    Bindings map[string][]Keybinding
-}
-
-type Keybindings struct {
-    binding []map[string]Keybinding
+    View string
+    Keys []Keybinding
 }
 
 type Keybinding struct {
-    key gocui.Key
-    description string
+    Name string
+    Key string
+    Description string
 }
 
 func MarshalPrint(obj interface{}) {
@@ -34,7 +31,7 @@ func MarshalPrint(obj interface{}) {
 	fmt.Printf("%v\n", string(s))
 }
 
-func (kb *Keybindings) LoadKeybindings() error {
+func (kb *Config) LoadConfig() error {
     viper.AddConfigPath(".")
     viper.SetConfigName("config")
     viper.SetConfigType("json")
@@ -46,43 +43,10 @@ func (kb *Keybindings) LoadKeybindings() error {
         return err
     }
 
-    MarshalPrint(viper.GetStringMap("keybindings"))
-
-    var keybs ConfigStruct
-    viper.Unmarshal(&keybs)
-
-    MarshalPrint(keybs)
+    err = viper.Unmarshal(&kb)
+    if err != nil {
+        return err
+    }
 
     return nil
 }
-
-// thing := map[string]interface {}{
-// 	"board":map[string]interface {}{
-// 		"":[]interface {}{}, 
-// 		"boardlist":[]interface {}{
-//             map[string]interface {}{
-//                 "description":"Cursor Down",
-//                 "key":"j"
-//             },
-//             map[string]interface {}{
-//                 "description":"Cursor Up",
-//                 "key":"k"
-//             }
-// 	    }
-//     }, 
-//     "issue":map[string]interface {}{
-//         "":[]interface {}{},
-//         "editdesc":[]interface {}{},
-//         "issuelist":[]interface {}{
-//             map[string]interface {}{
-//                 "description":"Cursor Down", 
-//                 "key":"j"
-//             }, map[string]interface {}{
-//                 "description":"Cursor Up", 
-//                 "key":"k"
-//             }
-//         }, 
-//         "issueview":[]interface {}{}
-//     }
-// }
-

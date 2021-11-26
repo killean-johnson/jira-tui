@@ -5,9 +5,10 @@ import (
 
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
+	"github.com/killean-johnson/jira-tui/config"
 )
 
-func CreateGUI(client *api.JiraClient) {
+func CreateTUI(client *api.JiraClient, conf *config.Config) {
 	gui, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
@@ -19,7 +20,14 @@ func CreateGUI(client *api.JiraClient) {
     var bl *BoardLayout = new(BoardLayout)
     bl.client = client
     bl.gui = gui
-	gui.SetManagerFunc(bl.boardLayout)
+    bl.config = conf
+    bl.keymap = make(map[string]func(*gocui.Gui, *gocui.View) error)
+    bl.keymap["blcursordown"] = cursorDown
+    bl.keymap["blcursorup"] = cursorUp
+    bl.keymap["blselect"] = bl.switchToIssueLayout
+    bl.keymap["blquit"] = boardQuit
+
+    gui.SetManagerFunc(bl.Layout)
 
 	if err := bl.boardLayoutKeybindings(); err != nil {
 		log.Panicln(err)
