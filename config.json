@@ -1,7 +1,7 @@
 {
-    "email": "killean.johnson@stairsupplies.com",
-    "apitoken": "dNVF26U9dLFmYmKBihsnC5C9",
-    "jiraurl": "https://stairsupplies-voe.atlassian.net",
+    "email": "",
+    "apitoken": "",
+    "jiraurl": "",
     "board": [
         {
             "view": "boardlist",
