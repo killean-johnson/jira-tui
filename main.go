@@ -18,9 +18,10 @@ func MarshalPrint(obj interface{}) {
 func main() {
 	godotenv.Load()
 	jiraToken := os.Getenv("JIRA_API_TOKEN")
+    email := os.Getenv("JIRA_EMAIL")
 
 	client := &api.JiraClient{}
-	client.Connect("killean.johnson@stairsupplies.com", jiraToken)
+	client.Connect(email, jiraToken)
 
     tui.CreateGUI(client)
 }
