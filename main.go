@@ -19,11 +19,13 @@ type boardList struct {
 }
 
 type Tui struct {
-	client      *api.JiraClient
-	boards      []jira.Board
-	chosenBoard int
-	issues      []jira.Issue
-	chosenIssue jira.Issue
+	client        *api.JiraClient
+	boards        []jira.Board
+	selectedBoard jira.Board
+	chosenBoard   bool
+	boardCursor   int
+	issues        []jira.Issue
+	chosenIssue   jira.Issue
 }
 
 func MarshalPrint(obj interface{}) {
@@ -31,14 +33,16 @@ func MarshalPrint(obj interface{}) {
 	fmt.Printf("%v\n", string(s))
 }
 
-func initialBoards(client *api.JiraClient) boardList {
+func initialTui(client *api.JiraClient) Tui {
 	boards, err := client.GetBoardList()
 	if err != nil {
 		fmt.Println(err)
 	}
-	return boardList{
-		boards: boards,
-		cursor: 0,
+	return Tui{
+		client:      client,
+		boards:      boards,
+		chosenBoard: false,
+		boardCursor: 0,
 	}
 }
 
@@ -55,7 +59,7 @@ func chooseBoardView(t Tui) string {
 	s := "Which Board"
 	for i, board := range t.boards {
 		cursor := " "
-		if t.boards[i].ID == t.chosenBoard {
+		if t.boardCursor == i {
 			cursor = ">"
 		}
 		s += fmt.Sprintf("\n%s %s", cursor, board.Name)
@@ -63,36 +67,47 @@ func chooseBoardView(t Tui) string {
 	return s
 }
 
+func boardKeys(msg tea.Msg, t Tui) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "j":
+			t.boardCursor++
+			if t.boardCursor >= len(t.boards) {
+				t.boardCursor = len(t.boards)
+			}
+		case "k":
+			t.boardCursor--
+			if t.boardCursor < 0 {
+				t.boardCursor = 0
+			}
+		}
+	}
+
+	return t, nil
+}
+
 func (t Tui) View() string {
 	var s string
-	if t.chosenBoard == 0 {
+	if !t.chosenBoard {
 		s = chooseBoardView(t)
 	}
 
 	return s
 }
 
-/* func (bl boardList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q":
-			return bl, tea.Quit
-		case "k":
-			if bl.cursor > 0 {
-				bl.cursor--
-			}
-		case "j":
-			if bl.cursor < len(bl.boards)-1 {
-				bl.cursor++
-			}
-		case "enter":
-
+func (t Tui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if msg, ok := msg.(tea.KeyMsg); ok {
+		k := msg.String()
+		if k == "q" || k == "esc" || k == "ctrl+c" {
+			return t, tea.Quit
 		}
-
 	}
-	return bl, nil
-} */
+	if !t.chosenBoard {
+		return boardKeys(msg, t)
+	}
+	return t, nil
+}
 
 func main() {
 	godotenv.Load()
@@ -101,7 +116,7 @@ func main() {
 	client := &api.JiraClient{}
 	client.Connect("killean.johnson@stairsupplies.com", jiraToken)
 
-	p := tea.NewProgram(initialBoards(client), tea.WithAltScreen())
+	p := tea.NewProgram(initialTui(client), tea.WithAltScreen())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Error has occured: %v", err)
 		os.Exit(1)
