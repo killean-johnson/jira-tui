@@ -19,5 +19,12 @@ func main() {
 	client.Connect(conf.Email, conf.APIToken, conf.JiraURL)
 
     // Run the TUI
-    tui.CreateTUI(client, conf)
+    t := new(tui.TUI)
+    t.SetupTUI(client, conf)
+    err = t.Run()
+    if err != nil {
+        panic(err)
+    }
+
+    //tui.CreateTUI(client, conf)
 }

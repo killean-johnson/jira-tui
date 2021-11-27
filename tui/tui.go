@@ -9,6 +9,96 @@ import (
 	"github.com/killean-johnson/jira-tui/config"
 )
 
+type TUI struct {
+    // Application structures
+    gui *gocui.Gui
+    client *api.JiraClient
+    conf *config.Config
+
+    // Ties together the keymapping for every view
+    keymap map[string]func(*gocui.Gui,*gocui.View) error
+
+    // Current state information
+    activeProjectKey string
+    activeBoardId int
+    activeSprintId int
+
+    // UI
+    pl *ProjectList
+    il *IssueList
+    iv *IssueView
+    ic *IssueCreate
+    ed *EditDesc
+    es *EditStatus
+    ea *EditAssignee
+    hb *Helpbar
+}
+
+func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
+    // These defaults keep things from getting messy later on when we need to check if they're initialized
+    t.activeProjectKey = ""
+    t.activeBoardId = -1
+    t.activeSprintId = -1
+
+    gui, err := gocui.NewGui(gocui.OutputNormal)
+    if err != nil {
+        return err
+    }
+
+    t.gui = gui
+    t.gui.InputEsc = true
+
+    t.pl = new(ProjectList)
+    t.il = new(IssueList)
+    t.iv = new(IssueView)
+    t.ic = new(IssueCreate)
+    t.ed = new(EditDesc)
+    t.es = new(EditStatus)
+    t.ea = new(EditAssignee)
+    t.hb = new(Helpbar)
+
+    // Set up the starting manager and the keymap for it
+    t.gui.SetManager(t.pl, t.hb)
+    if err = t.ProjectLayoutKeymap(); err != nil {
+        return err
+    }
+    
+    return nil
+}
+
+func (t *TUI) Run() error {
+	if err := t.gui.MainLoop(); err != nil && err != gocui.ErrQuit {
+        return err
+	}
+    return nil
+}
+
+func (tui *TUI) ProjectLayoutKeymap() error {
+    if err := tui.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, tui.Quit); err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func (tui *TUI) IssueViewLayoutKeymap() error {
+    return nil
+}
+
+func (tui *TUI) Quit(g *gocui.Gui, v *gocui.View) error {
+    return gocui.ErrQuit
+}
+
+
+
+
+
+
+
+
+
+
+
 func CreateTUI(client *api.JiraClient, conf *config.Config) {
 	gui, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
