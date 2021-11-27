@@ -137,11 +137,14 @@ func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
 	il.activeIssue = foundIssue
 
     // Display the issue information in the issueinfo view
+    assignee := ""
 	if foundIssue.Fields.Assignee != nil {
-		fmt.Fprintf(v, "ID: %s\nAssigned To %s\nDescription: %s\n", foundIssue.ID, foundIssue.Fields.Assignee.DisplayName, foundIssue.Fields.Description)
+        assignee = foundIssue.Fields.Assignee.DisplayName
 	} else {
-		fmt.Fprintf(v, "ID: %s\nUnassigned\nDescription: %s\n", foundIssue.ID, foundIssue.Fields.Description)
+        assignee = "Unassigned"
 	}
+    fmt.Fprintf(v, "%s\nAssigned To %s\nStatus: %s\nSummary: %s\nDescription: %s\n", 
+        foundIssue.Key, assignee, foundIssue.Fields.Status.StatusCategory.Name, foundIssue.Fields.Summary, foundIssue.Fields.Description)
 
     // Return to the issuelist view
 	if _, err := il.SetCurrentView("issuelist"); err != nil {
@@ -430,7 +433,7 @@ func (il *IssueLayout) issueLayoutKeybindings() error {
 
 func (il *IssueLayout) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := il.SetView("issueview", maxX/3*2, 0, maxX-1, maxY-1); err != nil {
+	if v, err := il.SetView("issueview", maxX/3*2, 0, maxX-1, maxY-4); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -446,7 +449,7 @@ func (il *IssueLayout) Layout(g *gocui.Gui) error {
     issueTextWidth := issueListWidth / 3 * 2
     titleIssueTextWidth := issueListWidth / 3 * 2 - 9
     issueInfoWidth := issueListWidth / 3
-	if v, err := il.SetView("issuelist", 0, 0, issueListWidth, maxY-1); err != nil {
+	if v, err := il.SetView("issuelist", 0, 0, issueListWidth, maxY-4); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
