@@ -47,22 +47,22 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.keymap["ilcursordown"] = cursorDown
     il.keymap["ilcursorup"] = cursorUp
     il.keymap["ilselectissue"] = il.selectIssue
-    il.keymap["ileditdescription"] = il.editDescription
-    il.keymap["ilchangestatus"] = il.editStatus
-    il.keymap["ileditassignee"] = il.editAssignee
+    il.keymap["ileditdescription"] = il.editDescDialogue
+    il.keymap["ileditstatus"] = il.editStatusDialogue
+    il.keymap["ileditassignee"] = il.editAssigneeDialogue
     il.keymap["ilquit"] = issueQuit
     il.keymap["ivcursordown"] = cursorDown
     il.keymap["ivcursorup"] = cursorUp
-    il.keymap["edsavechanges"] = il.changeDescription
-    il.keymap["edcancel"] = il.exitEditDescription
+    il.keymap["edconfirm"] = il.confirmEditDesc
+    il.keymap["edcancel"] = il.cancelEditDesc
     il.keymap["escursordown"] = cursorDown
     il.keymap["escursorup"] = cursorUp
-    il.keymap["essetstatus"] = il.changeStatus
-    il.keymap["escancel"] = il.exitEditStatus
+    il.keymap["esconfirm"] = il.confirmEditStatus
+    il.keymap["escancel"] = il.cancelEditStatus
     il.keymap["eacursordown"] = cursorDown
     il.keymap["eacursorup"] = cursorUp
-    il.keymap["easetassignee"] = il.changeAssignee
-    il.keymap["eacancel"] = il.exitAssignee
+    il.keymap["eaconfirm"] = il.confirmEditAssignee
+    il.keymap["eacancel"] = il.cancelEditAssignee
 
     il.helpbar = bl.helpbar
 

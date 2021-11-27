@@ -132,7 +132,7 @@ func createDefaultConfig(configFile string) error {
                     "description": "Edit Description"
                 },
                 {
-                    "name": "ilchangestatus",
+                    "name": "ileditstatus",
                     "key": "s",
                     "description": "Change Status"
                 },
@@ -167,7 +167,7 @@ func createDefaultConfig(configFile string) error {
             "view": "editdesc",
             "keys": [
                 {
-                    "name": "edsavechanges",
+                    "name": "edconfirm",
                     "key": "<C-s>",
                     "description": "Save Changes"
                 },
@@ -192,7 +192,7 @@ func createDefaultConfig(configFile string) error {
                     "description": "Cursor Up"
                 },
                 {
-                    "name": "essetstatus",
+                    "name": "esconfirm",
                     "key": "<ENTER>",
                     "description": "Set Status"
                 },
@@ -217,7 +217,7 @@ func createDefaultConfig(configFile string) error {
                     "description": "Cursor Up"
                 },
                 {
-                    "name": "easetassignee",
+                    "name": "eaconfirm",
                     "key": "<ENTER>",
                     "description": "Set Assignee"
                 },
@@ -229,7 +229,8 @@ func createDefaultConfig(configFile string) error {
             ]
         }
     ]
-}`)
+}
+`)
     _, err = file.Write(defaultConfigString)
     if err != nil {
         return err

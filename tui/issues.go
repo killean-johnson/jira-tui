@@ -154,7 +154,7 @@ func (il *IssueLayout) selectIssue(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (il *IssueLayout) editDescription(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) editDescDialogue(g *gocui.Gui, v *gocui.View) error {
 	if il.activeIssue != nil {
 		maxX, maxY := g.Size()
 		if v, err := il.SetView("editdesc", maxX/4, maxY/6, maxX/4*3, maxY/6*5); err != nil {
@@ -174,7 +174,7 @@ func (il *IssueLayout) editDescription(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (il *IssueLayout) changeDescription(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) confirmEditDesc(g *gocui.Gui, v *gocui.View) error {
 	if il.activeIssue != nil {
         buf := v.Buffer()
 		err := il.client.UpdateIssue(&jira.Issue{
@@ -202,7 +202,7 @@ func (il *IssueLayout) changeDescription(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (il *IssueLayout) exitEditDescription(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) cancelEditDesc(g *gocui.Gui, v *gocui.View) error {
 	if err := g.DeleteView("editdesc"); err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (il *IssueLayout) exitEditDescription(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (il *IssueLayout) editStatus(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) editStatusDialogue(g *gocui.Gui, v *gocui.View) error {
     if il.activeIssue != nil {
         statuses, err := il.client.GetStatusList()
         if err != nil {
@@ -242,7 +242,7 @@ func (il *IssueLayout) editStatus(g *gocui.Gui, v *gocui.View) error {
     return nil
 }
 
-func (il *IssueLayout) changeStatus(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) confirmEditStatus(g *gocui.Gui, v *gocui.View) error {
     if il.activeIssue != nil {
         var err error
         statuses, err := il.client.GetStatusList()
@@ -288,7 +288,7 @@ func (il *IssueLayout) changeStatus(g *gocui.Gui, v *gocui.View) error {
     return nil
 }
 
-func (il *IssueLayout) exitEditStatus(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) cancelEditStatus(g *gocui.Gui, v *gocui.View) error {
 	if err := g.DeleteView("editstatus"); err != nil {
 		return err
 	}
@@ -298,7 +298,7 @@ func (il *IssueLayout) exitEditStatus(g *gocui.Gui, v *gocui.View) error {
     return nil
 }
 
-func (il *IssueLayout) editAssignee(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) editAssigneeDialogue(g *gocui.Gui, v *gocui.View) error {
     if il.activeIssue != nil {
         board, err := il.client.GetBoard(il.boardId)
         if err != nil {
@@ -333,7 +333,7 @@ func (il *IssueLayout) editAssignee(g *gocui.Gui, v *gocui.View) error {
     return nil
 }
 
-func (il *IssueLayout) changeAssignee(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) confirmEditAssignee(g *gocui.Gui, v *gocui.View) error {
 	if il.activeIssue != nil {
         var l string
         var err error
@@ -384,7 +384,7 @@ func (il *IssueLayout) changeAssignee(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (il *IssueLayout) exitAssignee(g *gocui.Gui, v *gocui.View) error {
+func (il *IssueLayout) cancelEditAssignee(g *gocui.Gui, v *gocui.View) error {
 	if err := g.DeleteView("editassignee"); err != nil {
 		return err
 	}

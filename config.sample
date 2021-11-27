@@ -54,7 +54,7 @@
                     "description": "Edit Description"
                 },
                 {
-                    "name": "ilchangestatus",
+                    "name": "ileditstatus",
                     "key": "s",
                     "description": "Change Status"
                 },
@@ -89,7 +89,7 @@
             "view": "editdesc",
             "keys": [
                 {
-                    "name": "edsavechanges",
+                    "name": "edconfirm",
                     "key": "<C-s>",
                     "description": "Save Changes"
                 },
@@ -114,7 +114,7 @@
                     "description": "Cursor Up"
                 },
                 {
-                    "name": "essetstatus",
+                    "name": "esconfirm",
                     "key": "<ENTER>",
                     "description": "Set Status"
                 },
@@ -139,7 +139,7 @@
                     "description": "Cursor Up"
                 },
                 {
-                    "name": "easetassignee",
+                    "name": "eaconfirm",
                     "key": "<ENTER>",
                     "description": "Set Assignee"
                 },
