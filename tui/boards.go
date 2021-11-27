@@ -50,6 +50,7 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.keymap["ileditdescription"] = il.editDescDialogue
     il.keymap["ileditstatus"] = il.editStatusDialogue
     il.keymap["ileditassignee"] = il.editAssigneeDialogue
+    il.keymap["iladdissue"] = il.createIssueDialogue
     il.keymap["ilquit"] = issueQuit
     il.keymap["ivcursordown"] = cursorDown
     il.keymap["ivcursorup"] = cursorUp
@@ -63,6 +64,19 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.keymap["eacursorup"] = cursorUp
     il.keymap["eaconfirm"] = il.confirmEditAssignee
     il.keymap["eacancel"] = il.cancelEditAssignee
+
+    il.keymap["ciscycle"] = il.cycleCreateIssueWidgets
+    il.keymap["cisconfirm"] = il.confirmCreateIssue
+    il.keymap["ciscancel"] = il.cancelCreateIssue
+    il.keymap["ciacursordown"] = cursorDown
+    il.keymap["ciacursorup"] = cursorUp
+    il.keymap["ciasetassignee"] = il.setCreateIssueAssignee
+    il.keymap["ciacycle"] = il.cycleCreateIssueWidgets
+    il.keymap["ciaconfirm"] = il.confirmCreateIssue
+    il.keymap["ciacancel"] = il.cancelCreateIssue
+    il.keymap["cidcycle"] = il.cycleCreateIssueWidgets
+    il.keymap["cidconfirm"] = il.confirmCreateIssue
+    il.keymap["cidcancel"] = il.cancelCreateIssue
 
     il.helpbar = bl.helpbar
 
@@ -108,13 +122,21 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
         for {
             // Sleep for some time
             time.Sleep(time.Second * 5)
-            // Update the current issues
-            issues, err := il.client.GetIssuesForSprint(il.sprintId)
-            if err == nil {
-                sort.Slice(issues, sorter(issues))
-                il.issueList = issues
-                il.redrawIssueList(g)
-            }
+
+            // Update the issue list
+            g.Update(func(g *gocui.Gui) error {
+                // Update the current issues
+                issues, err := il.client.GetIssuesForSprint(il.sprintId)
+                if err == nil {
+                    sort.Slice(issues, sorter(issues))
+                    il.issueList = issues
+                    err := il.redrawIssueList(g)
+                    if err != nil {
+                        return err
+                    }
+                }
+                return nil
+            })
         }
     }(il, g)
 
@@ -123,7 +145,6 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
 	}
 	return nil
 }
-
 
 func (bl *BoardLayout) boardLayoutKeybindings() error {
     for _, view := range(bl.config.Board) {
@@ -141,6 +162,8 @@ func (bl *BoardLayout) boardLayoutKeybindings() error {
                         keySet = gocui.KeyEnter
                     case "<ESCAPE>":
                         keySet = gocui.KeyEsc
+                    case "<TAB>":
+                        keySet = gocui.KeyTab
                     }
                 }
 

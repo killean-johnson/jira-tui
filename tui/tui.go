@@ -34,22 +34,26 @@ func CreateTUI(client *api.JiraClient, conf *config.Config) {
     go func(hb chan string, gui *gocui.Gui) error {
         for {
             var helptext = <-hb
-            curView := gui.CurrentView()
-            maxX, maxY := gui.Size()
-            v, err := gui.SetView("helpbar", 0, maxY - 3, maxX - 1, maxY - 1)
-            if err != nil && err != gocui.ErrUnknownView {
-                panic(err)
-            } else if err == gocui.ErrUnknownView {
-                v.Title = "Keybindings"
-            }
-            gui.SetViewOnTop(v.Name())
+            gui.Update(func (gui *gocui.Gui) error {
+                curView := gui.CurrentView()
+                maxX, maxY := gui.Size()
+                v, err := gui.SetView("helpbar", 0, maxY - 3, maxX - 1, maxY - 1)
+                if err != nil && err != gocui.ErrUnknownView {
+                    panic(err)
+                } else if err == gocui.ErrUnknownView {
+                    v.Title = "Keybindings"
+                }
+                gui.SetViewOnTop(v.Name())
 
-            v.Clear()
-            fmt.Fprintf(v, "%s", helptext)
+                v.Clear()
+                fmt.Fprintf(v, "%s", helptext)
 
-            if curView != nil {
-                gui.SetCurrentView(curView.Name())
-            }
+                if curView != nil {
+                    gui.SetCurrentView(curView.Name())
+                }
+
+                return nil
+            })
         }
     }(helpbar, gui)
 

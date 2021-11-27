@@ -64,6 +64,11 @@
                     "description": "Change Assignee"
                 },
                 {
+                    "name": "iladdissue",
+                    "key": "A",
+                    "description": "Add Issue"
+                },
+                {
                     "name": "ilquit",
                     "key": "q",
                     "description": "Quit"
@@ -145,6 +150,81 @@
                 },
                 {
                     "name": "eacancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
+        },
+        {
+            "view": "createisssummary",
+            "keys": [
+                {
+                    "name": "ciscycle",
+                    "key": "<TAB>",
+                    "description": "Cycle Widgets"
+                },
+                {
+                    "name": "cisconfirm",
+                    "key": "<C-s>",
+                    "description": "Create Issue"
+                },
+                {
+                    "name": "ciscancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
+        },
+        {
+            "view": "createissassignee",
+            "keys": [
+                {
+                    "name": "ciacursordown",
+                    "key": "j",
+                    "description": "Cursor Down"
+                },
+                {
+                    "name": "ciacursorup",
+                    "key": "k",
+                    "description": "Cursor Up"
+                },
+                {
+                    "name": "ciasetassignee",
+                    "key": "<ENTER>",
+                    "description": "Set Assignee"
+                },
+                {
+                    "name": "ciacycle",
+                    "key": "<TAB>",
+                    "description": "Cycle Widgets"
+                },
+                {
+                    "name": "ciaconfirm",
+                    "key": "<C-s>",
+                    "description": "Create Issue"
+                },
+                {
+                    "name": "ciacancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
+        },
+        {
+            "view": "createissdesc",
+            "keys": [
+                {
+                    "name": "cidcycle",
+                    "key": "<TAB>",
+                    "description": "Cycle Widgets"
+                },
+                {
+                    "name": "cidconfirm",
+                    "key": "<C-s>",
+                    "description": "Create Issue"
+                },
+                {
+                    "name": "cidcancel",
                     "key": "<ESCAPE>",
                     "description": "Cancel"
                 }
