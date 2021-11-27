@@ -1,0 +1,23 @@
+Tui handles overarching UI pieces
+boardlist becomes a layout
+issuelist becomes a layout
+issueview becomes a layout
+editdesc becomes a layout
+editstatus becomes a layout
+editassignee becomes a layout
+The helpbar gets its own layout, that way it's not being tossed around
+The whole createissue becomes a layout
+
+This allows for much more separation of code and cleaner maintenance when things need to be changed
+
+File Structure
+tui
+  - tui.go <-- Main handler
+  - projectlist.go <-- View and select projects. Transitions into the issue screen
+  - issuelist.go <-- Displays the list of issues on the active sprint
+  - issueview.go <-- Displays additional info about issues when an issue is selected
+  - issuecreate.go <-- Handles creation of a new issue
+  - editdesc.go <-- Edit box that handles input and updating of the active issue's descriptionn
+  - editstatus.go <-- List box that handles updating of the active issue's status
+  - editassignee.go <-- List box that handles updating of the active issue's assignee
+  - helpbar.go <-- Manager for the helpbar
