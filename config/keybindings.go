@@ -14,7 +14,7 @@ type Config struct {
     Email string
     APIToken string
     JiraURL string
-    Board []LayoutStruct
+    Project []LayoutStruct
     Issue []LayoutStruct
 }
 
@@ -80,27 +80,27 @@ func createDefaultConfig(configFile string) error {
     "email": "",
     "apitoken": "",
     "jiraurl": "",
-    "board": [
+    "project": [
         {
-            "view": "boardlist",
+            "view": "projectlist",
             "keys": [
                 {
-                    "name": "blcursordown",
+                    "name": "plcursordown",
                     "key": "j",
                     "description": "Cursor Down"
                 },
                 {
-                    "name": "blcursorup",
+                    "name": "plcursorup",
                     "key": "k",
                     "description": "Cursor Up"
                 },
                 {
-                    "name": "blselect",
+                    "name": "plselect",
                     "key": "<ENTER>",
                     "description": "Select Board"
                 },
                 {
-                    "name": "blquit",
+                    "name": "plquit",
                     "key": "q",
                     "description": "Quit"
                 }
@@ -140,6 +140,11 @@ func createDefaultConfig(configFile string) error {
                     "name": "ileditassignee",
                     "key": "a",
                     "description": "Change Assignee"
+                },
+                {
+                    "name": "iladdissue",
+                    "key": "A",
+                    "description": "Add Issue"
                 },
                 {
                     "name": "ilquit",
@@ -227,10 +232,84 @@ func createDefaultConfig(configFile string) error {
                     "description": "Cancel"
                 }
             ]
+        },
+        {
+            "view": "createisssummary",
+            "keys": [
+                {
+                    "name": "ciscycle",
+                    "key": "<TAB>",
+                    "description": "Cycle Widgets"
+                },
+                {
+                    "name": "cisconfirm",
+                    "key": "<C-s>",
+                    "description": "Create Issue"
+                },
+                {
+                    "name": "ciscancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
+        },
+        {
+            "view": "createissassignee",
+            "keys": [
+                {
+                    "name": "ciacursordown",
+                    "key": "j",
+                    "description": "Cursor Down"
+                },
+                {
+                    "name": "ciacursorup",
+                    "key": "k",
+                    "description": "Cursor Up"
+                },
+                {
+                    "name": "ciasetassignee",
+                    "key": "<ENTER>",
+                    "description": "Set Assignee"
+                },
+                {
+                    "name": "ciacycle",
+                    "key": "<TAB>",
+                    "description": "Cycle Widgets"
+                },
+                {
+                    "name": "ciaconfirm",
+                    "key": "<C-s>",
+                    "description": "Create Issue"
+                },
+                {
+                    "name": "ciacancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
+        },
+        {
+            "view": "createissdesc",
+            "keys": [
+                {
+                    "name": "cidcycle",
+                    "key": "<TAB>",
+                    "description": "Cycle Widgets"
+                },
+                {
+                    "name": "cidconfirm",
+                    "key": "<C-s>",
+                    "description": "Create Issue"
+                },
+                {
+                    "name": "cidcancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
         }
     ]
-}
-`)
+}`)
     _, err = file.Write(defaultConfigString)
     if err != nil {
         return err

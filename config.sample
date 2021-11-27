@@ -2,27 +2,27 @@
     "email": "",
     "apitoken": "",
     "jiraurl": "",
-    "board": [
+    "project": [
         {
-            "view": "boardlist",
+            "view": "projectlist",
             "keys": [
                 {
-                    "name": "blcursordown",
+                    "name": "plcursordown",
                     "key": "j",
                     "description": "Cursor Down"
                 },
                 {
-                    "name": "blcursorup",
+                    "name": "plcursorup",
                     "key": "k",
                     "description": "Cursor Up"
                 },
                 {
-                    "name": "blselect",
+                    "name": "plselect",
                     "key": "<ENTER>",
                     "description": "Select Board"
                 },
                 {
-                    "name": "blquit",
+                    "name": "plquit",
                     "key": "q",
                     "description": "Quit"
                 }

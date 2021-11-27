@@ -147,7 +147,7 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (bl *BoardLayout) boardLayoutKeybindings() error {
-    for _, view := range(bl.config.Board) {
+    for _, view := range(bl.config.Project) {
         for _, key := range(view.Keys) {
             if len(key.Key) > 1 {
                 var keySet gocui.Key
