@@ -15,6 +15,7 @@ type IssueLayout struct {
 	client      *api.JiraClient
 	activeIssue *jira.Issue
     issueList   []jira.Issue
+    boardId int
 	sprintId    int
     config *config.Config
     keymap map[string]func(*gocui.Gui, *gocui.View) error
@@ -286,6 +287,102 @@ func (il *IssueLayout) changeStatus(g *gocui.Gui, v *gocui.View) error {
 
 func (il *IssueLayout) exitEditStatus(g *gocui.Gui, v *gocui.View) error {
 	if err := g.DeleteView("editstatus"); err != nil {
+		return err
+	}
+	if _, err := il.SetCurrentView("issuelist"); err != nil {
+		return err
+	}
+    return nil
+}
+
+func (il *IssueLayout) editAssignee(g *gocui.Gui, v *gocui.View) error {
+    if il.activeIssue != nil {
+        board, err := il.client.GetBoard(il.boardId)
+        if err != nil {
+            return err
+        }
+
+        users, err := il.client.GetUsers(strings.Split(board.Name, " ")[0])
+        if err != nil {
+            return err
+        }
+
+		maxX, maxY := g.Size()
+		if v, err := il.SetView("editassignee", maxX/4, maxY/6, maxX/4*3, maxY/6*5); err != nil {
+			if err != gocui.ErrUnknownView {
+				return err
+			}
+            v.Highlight = true
+            v.SelBgColor = gocui.ColorGreen
+            v.SelFgColor = gocui.ColorBlack
+			v.Title = "Set Status"
+
+            for _, user := range(*users) {
+                fmt.Fprintf(v, "%s\n", user.DisplayName)
+            }
+
+			if _, err := il.SetCurrentView("editassignee"); err != nil {
+				return err
+			}
+		}
+    }
+
+    return nil
+}
+
+func (il *IssueLayout) changeAssignee(g *gocui.Gui, v *gocui.View) error {
+	if il.activeIssue != nil {
+        var l string
+        var err error
+        _, cy := v.Cursor()
+        if l, err = v.Line(cy); err != nil {
+            l = ""
+        }
+
+        board, err := il.client.GetBoard(il.boardId)
+        if err != nil {
+            return err
+        }
+
+        users, err := il.client.GetUsers(strings.Split(board.Name, " ")[0])
+        if err != nil {
+            return err
+        }
+
+        assignee := &jira.User{}
+        for _, user := range(*users) {
+            if user.DisplayName == l {
+                assignee = &user
+                break
+            }
+        }
+
+		err = il.client.UpdateIssue(&jira.Issue{
+			Key: il.activeIssue.Key,
+			Fields: &jira.IssueFields{
+				Assignee: assignee,
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+        localIssue := il.getLocalIssueUtil(il.activeIssue.Key)
+        if localIssue != nil {
+            localIssue.Fields.Assignee = assignee
+        }
+	}
+	if err := g.DeleteView("editassignee"); err != nil {
+		return err
+	}
+	if _, err := il.SetCurrentView("issuelist"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (il *IssueLayout) exitAssignee(g *gocui.Gui, v *gocui.View) error {
+	if err := g.DeleteView("editassignee"); err != nil {
 		return err
 	}
 	if _, err := il.SetCurrentView("issuelist"); err != nil {

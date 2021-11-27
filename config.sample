@@ -59,6 +59,11 @@
                     "description": "Change Status"
                 },
                 {
+                    "name": "ileditassignee",
+                    "key": "a",
+                    "description": "Change Assignee"
+                },
+                {
                     "name": "ilquit",
                     "key": "q",
                     "description": "Quit"
@@ -115,6 +120,31 @@
                 },
                 {
                     "name": "escancel",
+                    "key": "<ESCAPE>",
+                    "description": "Cancel"
+                }
+            ]
+        },
+        {
+            "view": "editassignee",
+            "keys": [
+                {
+                    "name": "eacursordown",
+                    "key": "j",
+                    "description": "Cursor Down"
+                },
+                {
+                    "name": "eacursorup",
+                    "key": "k",
+                    "description": "Cursor Up"
+                },
+                {
+                    "name": "easetassignee",
+                    "key": "<ENTER>",
+                    "description": "Set Assignee"
+                },
+                {
+                    "name": "eacancel",
                     "key": "<ESCAPE>",
                     "description": "Cancel"
                 }

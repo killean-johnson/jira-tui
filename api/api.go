@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/andygrunwald/go-jira"
 )
@@ -44,6 +45,14 @@ func (jc *JiraClient) GetBoardList() ([]jira.Board, error) {
 		return nil, err
 	}
 	return boards.Values, nil
+}
+
+func (jc *JiraClient) GetBoard(boardId int) (*jira.Board, error) {
+    board, _, err := jc.client.Board.GetBoard(boardId)
+    if err != nil {
+        return nil, err
+    }
+    return board, nil
 }
 
 func (jc *JiraClient) GetSprintList(boardId int) ([]jira.Sprint, error) {
@@ -129,4 +138,25 @@ func (jc *JiraClient) GetActiveSprint() (*jira.Sprint, error) {
         return nil, err
     }
     return &sprints.Values[0], nil
+}
+
+func (jc *JiraClient) GetUsers(boardKey string) (*[]jira.User, error) {
+	u := url.URL{
+		Path: "/rest/api/2/user/assignable/multiProjectSearch",
+	}
+	uv := url.Values{}
+    uv.Add("projectKeys", boardKey)
+    uv.Add("startAt", "0")
+    uv.Add("maxResults", "50")
+
+	u.RawQuery = uv.Encode()
+
+    req, _ := jc.client.NewRequest("GET", u.String(), nil)
+
+    users := new([]jira.User)
+    _, err := jc.client.Do(req, users)
+    if err != nil {
+        return nil, err
+    }
+    return users, nil
 }

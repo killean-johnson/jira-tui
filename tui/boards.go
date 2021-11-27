@@ -40,6 +40,7 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.gui = bl.gui
 	il.client = bl.client
 	il.sprintId = sprints[0].ID
+    il.boardId = boardId
     il.config = bl.config
 
     il.keymap = make(map[string]func(*gocui.Gui, *gocui.View) error)
@@ -48,6 +49,7 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.keymap["ilselectissue"] = il.selectIssue
     il.keymap["ileditdescription"] = il.editDescription
     il.keymap["ilchangestatus"] = il.editStatus
+    il.keymap["ileditassignee"] = il.editAssignee
     il.keymap["ilquit"] = issueQuit
     il.keymap["ivcursordown"] = cursorDown
     il.keymap["ivcursorup"] = cursorUp
@@ -57,6 +59,10 @@ func (bl *BoardLayout) switchToIssueLayout(g *gocui.Gui, v *gocui.View) error {
     il.keymap["escursorup"] = cursorUp
     il.keymap["essetstatus"] = il.changeStatus
     il.keymap["escancel"] = il.exitEditStatus
+    il.keymap["eacursordown"] = cursorDown
+    il.keymap["eacursorup"] = cursorUp
+    il.keymap["easetassignee"] = il.changeAssignee
+    il.keymap["eacancel"] = il.exitAssignee
 
     il.helpbar = bl.helpbar
 
