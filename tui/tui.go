@@ -40,8 +40,6 @@ func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
     t.client = client
     t.config = conf
     t.keymap = make(map[string]func(*gocui.Gui,*gocui.View) error)
-    t.SetupProjectLayoutKeymap()
-    t.SetupIssueViewLayoutKeymap()
 
     // These defaults keep things from getting messy later on when we need to check if they're initialized
     t.activeProjectKey = ""
@@ -84,6 +82,10 @@ func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
     t.ea.client = t.client
     t.hb.client = t.client
 
+    // Setting up keymaps has to happen AFTER the layouts are created
+    t.SetupProjectLayoutKeymap()
+    t.SetupIssueViewLayoutKeymap()
+
     // TODO: Replace this with actual caching for the project id
     alreadyHasProjectInCache := false
 
@@ -104,6 +106,7 @@ func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
 }
 
 func (t *TUI) Run() error {
+    defer t.gui.Close()
 	if err := t.gui.MainLoop(); err != nil && err != gocui.ErrQuit {
         return err
 	}
@@ -115,7 +118,7 @@ func (t *TUI) SetupProjectLayoutKeymap() error {
     t.keymap["plcursordown"] = cursorDown
     t.keymap["plcursorup"] = cursorUp
     t.keymap["plselect"] = t.pl.SelectProject
-    t.keymap["plquit"] = boardQuit
+    t.keymap["plquit"] = t.Quit
     return nil
 }
 
@@ -146,25 +149,25 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
     // t.keymap["ileditstatus"] = il.editStatusDialogue
     // t.keymap["ileditassignee"] = il.editAssigneeDialogue
     // t.keymap["iladdissue"] = il.createIssueDialogue
-    t.keymap["ilquit"] = issueQuit
-    t.keymap["ivcursordown"] = cursorDown
-    t.keymap["ivcursorup"] = cursorUp
+    t.keymap["ilquit"] = t.Quit
+    // t.keymap["ivcursordown"] = cursorDown
+    // t.keymap["ivcursorup"] = cursorUp
     // t.keymap["edconfirm"] = il.confirmEditDesc
     // t.keymap["edcancel"] = il.cancelEditDesc
-    t.keymap["escursordown"] = cursorDown
-    t.keymap["escursorup"] = cursorUp
+    // t.keymap["escursordown"] = cursorDown
+    // t.keymap["escursorup"] = cursorUp
     // t.keymap["esconfirm"] = il.confirmEditStatus
     // t.keymap["escancel"] = il.cancelEditStatus
-    t.keymap["eacursordown"] = cursorDown
-    t.keymap["eacursorup"] = cursorUp
+    // t.keymap["eacursordown"] = cursorDown
+    // t.keymap["eacursorup"] = cursorUp
     // t.keymap["eaconfirm"] = il.confirmEditAssignee
     // t.keymap["eacancel"] = il.cancelEditAssignee
 
     // t.keymap["ciscycle"] = il.cycleCreateIssueWidgets
     // t.keymap["cisconfirm"] = il.confirmCreateIssue
     // t.keymap["ciscancel"] = il.cancelCreateIssue
-    t.keymap["ciacursordown"] = cursorDown
-    t.keymap["ciacursorup"] = cursorUp
+    // t.keymap["ciacursordown"] = cursorDown
+    // t.keymap["ciacursorup"] = cursorUp
     // t.keymap["ciasetassignee"] = il.setCreateIssueAssignee
     // t.keymap["ciacycle"] = il.cycleCreateIssueWidgets
     // t.keymap["ciaconfirm"] = il.confirmCreateIssue
@@ -185,6 +188,11 @@ func (t *TUI) IssueViewLayoutKeybind() error {
 }
 
 func (t *TUI) SetupIssueViewLayout() error {
+    // Set up the starting manager and the keymap for it
+    t.gui.SetManager(t.il, t.iv, t.hb)
+    if err := t.IssueViewLayoutKeybind(); err != nil {
+        return err
+    }
     return nil
 }
 
@@ -224,6 +232,31 @@ func (t *TUI) SetKeybinding(views []config.LayoutStruct) error {
         return err
     }
 
+    return nil
+}
+
+// Runs in a routine. Checks jira to see if there were any updates to the active list
+func (t *TUI) Updater(g *gocui.Gui) error {
+    // Make sure we've actually gone into a project and have a sprint
+    if t.activeBoardId != -1 && t.activeSprintId != -1 {
+        // Need to have the current view be the issue list, otherwise prooooobably don't update
+        if t.gui.CurrentView() == nil || t.gui.CurrentView().Name() != ISSUELIST {
+            return nil
+        }
+
+        // Get the issues
+        issues, err := t.client.GetIssuesForSprint(t.activeSprintId)
+        if err != nil {
+            return err
+        }
+
+        // TODO: Update this at some point to do something smarter than just replacing the list. Really need to be wiser about this...
+        t.il.issues = issues
+
+
+        // Update the actual GUI interface
+        t.gui.Update(t.il.RedrawList)
+    }
     return nil
 }
 

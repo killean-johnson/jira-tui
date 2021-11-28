@@ -1,6 +1,9 @@
 package tui
 
 import (
+	"fmt"
+
+	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
 )
@@ -8,8 +11,66 @@ import (
 type IssueList struct {
     parent *TUI
     client *api.JiraClient
+
+    issues []jira.Issue
 }
 
-func (pl *IssueList) Layout(g *gocui.Gui) error {
+func (il *IssueList) RedrawList(g *gocui.Gui) error {
+    issueView, err := g.View(ISSUELIST)
+    if err != nil {
+        return err
+    }
+
+	issueView.Clear()
+	maxX, _ := g.Size()
+
+	// Set up the issue list
+	issueListWidth := maxX/3*2 - 1
+	issueTextWidth := issueListWidth / 3 * 2
+	titleIssueTextWidth := issueListWidth/3*2 - 9
+	issueInfoWidth := issueListWidth / 3
+	issueView.Title = fmt.Sprintf("%-5s | %-"+fmt.Sprint(titleIssueTextWidth)+"s | %-20s | %-12s", "Key", "Issue", "Assignee", "Status")
+
+	for _, is := range il.issues {
+		var issueText, issueInfo string
+
+		if len(is.Fields.Summary)+9 > issueTextWidth {
+			issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary[:issueTextWidth-9])
+		} else {
+			issueText = fmt.Sprintf("%s | %s", is.Key, is.Fields.Summary)
+		}
+
+		if is.Fields.Assignee != nil {
+			issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+		} else {
+			issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.StatusCategory.Name)
+		}
+
+		fmt.Fprintf(issueView, "%-"+fmt.Sprint(issueTextWidth)+"s | %-"+fmt.Sprint(issueInfoWidth)+"s\n", issueText, issueInfo)
+	}
+
+	return nil
+}
+
+func (il *IssueList) Layout(g *gocui.Gui) error {
+    maxX, maxY := g.Size()
+
+	issueListWidth := maxX/3*2 - 1
+    v, err := g.SetView(ISSUELIST, 0, 0, issueListWidth, maxY - 4)
+    if err == gocui.ErrUnknownView {
+		v.Highlight = true
+		v.SelBgColor = gocui.ColorGreen
+		v.SelFgColor = gocui.ColorBlack
+
+        _, err = g.SetCurrentView(ISSUELIST)
+        if err != nil {
+            return err
+        }
+    } else if err != nil {
+        return err
+    }
+
+    il.RedrawList(g)
+
     return nil
 }

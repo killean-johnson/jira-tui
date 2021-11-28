@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
@@ -45,6 +46,14 @@ func (pl *ProjectList) SelectProject(g *gocui.Gui, v *gocui.View) error {
     if err != nil {
         return err
     }
+
+    // Begin the updater routine
+    go func() {
+        for {
+            pl.parent.Updater(pl.parent.gui)
+            time.Sleep(time.Second * 5)
+        }
+    }()
 
     return nil
 }
