@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -13,11 +12,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type boardList struct {
-	boards []jira.Board
-	cursor int
-}
-
 type Tui struct {
 	client        *api.JiraClient
 	boards        []jira.Board
@@ -26,11 +20,6 @@ type Tui struct {
 	boardCursor   int
 	issues        []jira.Issue
 	chosenIssue   jira.Issue
-}
-
-func MarshalPrint(obj interface{}) {
-	s, _ := json.MarshalIndent(obj, "", "\t")
-	fmt.Printf("%v\n", string(s))
 }
 
 func initialTui(client *api.JiraClient) Tui {
@@ -44,15 +33,6 @@ func initialTui(client *api.JiraClient) Tui {
 		chosenBoard: false,
 		boardCursor: 0,
 	}
-}
-
-func (t Tui) Init() tea.Cmd {
-	/* boards, err := client.GetBoardList()
-	   bl.boards = boards
-	   if err != nil {
-	       fmt.Println(err)
-	   } */
-	return nil
 }
 
 func chooseBoardView(t Tui) string {
@@ -85,6 +65,15 @@ func boardKeys(msg tea.Msg, t Tui) (tea.Model, tea.Cmd) {
 	}
 
 	return t, nil
+}
+
+func (t Tui) Init() tea.Cmd {
+	/* boards, err := client.GetBoardList()
+	   bl.boards = boards
+	   if err != nil {
+	       fmt.Println(err)
+	   } */
+	return nil
 }
 
 func (t Tui) View() string {
