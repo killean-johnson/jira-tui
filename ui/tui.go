@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"fmt"
-
-	"github.com/andygrunwald/go-jira"
 	"github.com/killean-johnson/jira-tui/api"
 
 	// "github.com/killean-johnson/jira-tui/tui"
@@ -18,40 +15,63 @@ const (
 )
 
 type commonModel struct {
-	jc *api.JiraClient
+	jc    *api.JiraClient
+	width int
 }
 
 type Tui struct {
-	common  *commonModel
-	uiState uiState
+	common    *commonModel
+	uiState   uiState
+	boardList BoardModel
 }
 
-func initialTui(client *api.JiraClient) Tui {
-	return Tui{}
+type updateModelState uiState
+
+func InitialTui(client *api.JiraClient) Tui {
+	common := commonModel{
+		jc:    client,
+		width: 80,
+	}
+	return Tui{
+		common:    &common,
+		uiState:   stateShowBoards,
+		boardList: newBoardModel(&common),
+	}
 }
 
 func (t Tui) Init() tea.Cmd {
-	/* boards, err := client.GetBoardList()
-	   bl.boards = boards
-	   if err != nil {
-	       fmt.Println(err)
-	   } */
 	return nil
 }
 
 func (t Tui) View() string {
-	var s string
-	s = "Hello World"
-
-	return s
+	switch t.uiState {
+	case stateShowBoards:
+		return t.boardList.View()
+	default:
+		return t.boardList.View()
+	}
 }
 
 func (t Tui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if msg, ok := msg.(tea.KeyMsg); ok {
-		k := msg.String()
-		if k == "q" || k == "esc" || k == "ctrl+c" {
+	var cmds []tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		t.common.width = msg.Width
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q":
 			return t, tea.Quit
 		}
+	case updateModelState:
+		t.uiState = stateShowIssues
 	}
-	return t, nil
+	switch t.uiState {
+	case stateShowBoards:
+		newBoardsModel, cmd := t.boardList.Update(msg)
+		t.boardList = newBoardsModel
+		cmds = append(cmds, cmd)
+	}
+
+	return t, tea.Batch(cmds...)
 }
