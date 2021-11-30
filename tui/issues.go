@@ -90,146 +90,146 @@ func (il *IssueLayout) redrawIssueList(g *gocui.Gui) error {
 }
 
 func (il *IssueLayout) createIssueDialogue(g *gocui.Gui, v *gocui.View) error {
-    if il.activeIssue != nil {
-        g.Highlight = true
-        g.Cursor = true
-        g.SelFgColor = gocui.ColorRed
+	if il.activeIssue != nil {
+		g.Highlight = true
+		g.Cursor = true
+		g.SelFgColor = gocui.ColorRed
 
-        maxX, maxY := g.Size()
-        backMaxX := maxX - 6 - 5
-        if v, err := il.SetView("createissbackground", 5, 5, maxX-6, maxY-6); err != nil {
-            if err != gocui.ErrUnknownView {
-                return err
-            }
-            v.Title = "Create Issue"
-        }
+		maxX, maxY := g.Size()
+		backMaxX := maxX - 6 - 5
+		if v, err := il.SetView("createissbackground", 5, 5, maxX-6, maxY-6); err != nil {
+			if err != gocui.ErrUnknownView {
+				return err
+			}
+			v.Title = "Create Issue"
+		}
 
-        if v, err := il.SetView("createisssummary", 7, 6, maxX-8, 8); err != nil {
-            if err != gocui.ErrUnknownView {
-                return err
-            }
-            v.Title = "Summary"
-            v.Editable = true
-        }
+		if v, err := il.SetView("createisssummary", 7, 6, maxX-8, 8); err != nil {
+			if err != gocui.ErrUnknownView {
+				return err
+			}
+			v.Title = "Summary"
+			v.Editable = true
+		}
 
-        if v, err := il.SetView("createissassignee", 7, 9, backMaxX/3, maxY-7); err != nil {
-            if err != gocui.ErrUnknownView {
-                return err
-            }
-            v.Title = "Assignee"
-            v.Highlight = true
-            v.SelBgColor = gocui.ColorGreen
-            v.SelFgColor = gocui.ColorBlack
+		if v, err := il.SetView("createissassignee", 7, 9, backMaxX/3, maxY-7); err != nil {
+			if err != gocui.ErrUnknownView {
+				return err
+			}
+			v.Title = "Assignee"
+			v.Highlight = true
+			v.SelBgColor = gocui.ColorGreen
+			v.SelFgColor = gocui.ColorBlack
 
-            // Get the possible assignable people and print them out
-            board, err := il.client.GetBoard(il.boardId)
-            if err != nil {
-                return err
-            }
+			// Get the possible assignable people and print them out
+			board, err := il.client.GetBoard(il.boardId)
+			if err != nil {
+				return err
+			}
 
-            users, err := il.client.GetUsers(strings.Split(board.Name, " ")[0])
-            if err != nil {
-                return err
-            }
+			users, err := il.client.GetUsers(strings.Split(board.Name, " ")[0])
+			if err != nil {
+				return err
+			}
 
-            for _, user := range *users {
-                fmt.Fprintln(v, user.DisplayName)
-            }
-        }
+			for _, user := range *users {
+				fmt.Fprintln(v, user.DisplayName)
+			}
+		}
 
-        if v, err := il.SetView("createissdesc", 1+backMaxX/3, 9, maxX-8, maxY-7); err != nil {
-            if err != gocui.ErrUnknownView {
-                return err
-            }
-            v.Title = "Description"
-            v.Editable = true
-        }
+		if v, err := il.SetView("createissdesc", 1+backMaxX/3, 9, maxX-8, maxY-7); err != nil {
+			if err != gocui.ErrUnknownView {
+				return err
+			}
+			v.Title = "Description"
+			v.Editable = true
+		}
 
-        _, err := il.SetCurrentView("createisssummary")
-        if err != nil {
-            return err
-        }
-    } else {
-        *il.helpbar <- "NEED AN ACTIVE ISSUE SELECTED FIRST"
-    }
+		_, err := il.SetCurrentView("createisssummary")
+		if err != nil {
+			return err
+		}
+	} else {
+		*il.helpbar <- "NEED AN ACTIVE ISSUE SELECTED FIRST"
+	}
 	return nil
 }
 
 func (il *IssueLayout) confirmCreateIssue(g *gocui.Gui, v *gocui.View) error {
-    if il.activeIssue != nil {
-        // Gather the info from all of the different boxes (Using the gui so it doesn't spam the helpbar)
-        v, err := g.SetCurrentView("createisssummary")
-        if err != nil {
-            return err
-        }
-        summary := strings.ReplaceAll(v.Buffer(), "\n", "")
+	if il.activeIssue != nil {
+		// Gather the info from all of the different boxes (Using the gui so it doesn't spam the helpbar)
+		v, err := g.SetCurrentView("createisssummary")
+		if err != nil {
+			return err
+		}
+		summary := strings.ReplaceAll(v.Buffer(), "\n", "")
 
-        // TODO: Make some sort of warning box that lets them know info is missing
-        if summary == "" {
-            return nil
-        }
+		// TODO: Make some sort of warning box that lets them know info is missing
+		if summary == "" {
+			return nil
+		}
 
-        v, err = g.SetCurrentView("createissdesc")
-        if err != nil {
-            return err
-        }
-        description := v.Buffer()
+		v, err = g.SetCurrentView("createissdesc")
+		if err != nil {
+			return err
+		}
+		description := v.Buffer()
 
-        // TODO: Make some sort of warning box that lets them know info is missing
-        if description == "" {
-            return nil
-        }
+		// TODO: Make some sort of warning box that lets them know info is missing
+		if description == "" {
+			return nil
+		}
 
-        v, err = g.SetCurrentView("createissassignee")
-        if err != nil {
-            return err
-        }
-        assigneeName := v.Title
+		v, err = g.SetCurrentView("createissassignee")
+		if err != nil {
+			return err
+		}
+		assigneeName := v.Title
 
-        if assigneeName == "Assignee" {
-            assigneeName = ""
-        }
+		if assigneeName == "Assignee" {
+			assigneeName = ""
+		}
 
-        board, err := il.client.GetBoard(il.boardId)
-        if err != nil {
-            return err
-        }
+		board, err := il.client.GetBoard(il.boardId)
+		if err != nil {
+			return err
+		}
 
-        users, err := il.client.GetUsers(strings.Split(board.Name, " ")[0])
-        if err != nil {
-            return err
-        }
+		users, err := il.client.GetUsers(strings.Split(board.Name, " ")[0])
+		if err != nil {
+			return err
+		}
 
-        assignee := &jira.User{}
-        for _, user := range *users {
-            if user.DisplayName == assigneeName {
-                assignee = &user
-                break
-            }
-        }
+		assignee := &jira.User{}
+		for _, user := range *users {
+			if user.DisplayName == assigneeName {
+				assignee = &user
+				break
+			}
+		}
 
-        i := jira.Issue{
-            Fields: &jira.IssueFields{
-                Summary: summary,
-                Description: description,
-                Type: jira.IssueType{
-                    Name: "Story",
-                },
-                Project: il.activeIssue.Fields.Project,
-                Assignee: assignee,
-            },
-        }
+		i := jira.Issue{
+			Fields: &jira.IssueFields{
+				Summary:     summary,
+				Description: description,
+				Type: jira.IssueType{
+					Name: "Story",
+				},
+				Project:  il.activeIssue.Fields.Project,
+				Assignee: assignee,
+			},
+		}
 
-        _, err = il.client.CreateIssue(&i)
-        if err != nil {
-            panic(err)
-        }
+		_, err = il.client.CreateIssue(&i)
+		if err != nil {
+			panic(err)
+		}
 
-        return il.cancelCreateIssue(g, v)
-    } else {
-        *il.helpbar <- "NEED AN ACTIVE ISSUE SELECTED FIRST"
-    }
-    return nil
+		return il.cancelCreateIssue(g, v)
+	} else {
+		*il.helpbar <- "NEED AN ACTIVE ISSUE SELECTED FIRST"
+	}
+	return nil
 }
 
 func (il *IssueLayout) cancelCreateIssue(g *gocui.Gui, v *gocui.View) error {

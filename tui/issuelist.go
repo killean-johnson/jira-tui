@@ -9,17 +9,63 @@ import (
 )
 
 type IssueList struct {
-    parent *TUI
-    client *api.JiraClient
+	parent *TUI
+	client *api.JiraClient
 
-    issues []jira.Issue
+	issues []jira.Issue
+}
+
+func (il *IssueList) SelectIssue(g *gocui.Gui, v *gocui.View) error {
+	/* // Get the string from the currently highlighted line
+	_, cy := v.Cursor()
+	l, err := v.Line(cy)
+	if err != nil {
+		l = ""
+	}
+
+	// Switch to the issue view
+	if v, err = il.SetCurrentView("issueview"); err != nil {
+		return err
+	}
+
+	// Clear out any previously written info
+	v.Clear()
+
+	// Match the ID from the string up with the one in our issue list
+	id := strings.Trim(strings.Split(l, "|")[0], " ")
+	var foundIssue *jira.Issue = il.getLocalIssueUtil(id)
+
+	// Do nothing if the issue wasn't found
+	if foundIssue == nil {
+		return nil
+	}
+
+	// Update our actively selected issue
+	il.activeIssue = foundIssue
+
+	// Display the issue information in the issueinfo view
+	assignee := ""
+	if foundIssue.Fields.Assignee != nil {
+		assignee = foundIssue.Fields.Assignee.DisplayName
+	} else {
+		assignee = "Unassigned"
+	}
+	fmt.Fprintf(v, "%s\nAssigned To %s\nStatus: %s\nSummary: %s\nDescription: %s\n",
+		foundIssue.Key, assignee, foundIssue.Fields.Status.StatusCategory.Name, foundIssue.Fields.Summary, foundIssue.Fields.Description)
+
+	// Return to the issuelist view
+	if _, err := g.SetCurrentView("issuelist"); err != nil {
+		return err
+	} */
+
+	return nil
 }
 
 func (il *IssueList) RedrawList(g *gocui.Gui) error {
-    issueView, err := g.View(ISSUELIST)
-    if err != nil {
-        return err
-    }
+	issueView, err := g.View(ISSUELIST)
+	if err != nil {
+		return err
+	}
 
 	issueView.Clear()
 	maxX, _ := g.Size()
@@ -53,24 +99,26 @@ func (il *IssueList) RedrawList(g *gocui.Gui) error {
 }
 
 func (il *IssueList) Layout(g *gocui.Gui) error {
-    maxX, maxY := g.Size()
+	maxX, maxY := g.Size()
 
 	issueListWidth := maxX/3*2 - 1
-    v, err := g.SetView(ISSUELIST, 0, 0, issueListWidth, maxY - 4)
-    if err == gocui.ErrUnknownView {
+	v, err := g.SetView(ISSUELIST, 0, 0, issueListWidth, maxY-4)
+	if err == gocui.ErrUnknownView {
 		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
 
-        _, err = g.SetCurrentView(ISSUELIST)
-        if err != nil {
-            return err
-        }
-    } else if err != nil {
-        return err
-    }
+		_, err = g.SetCurrentView(ISSUELIST)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
 
-    il.RedrawList(g)
+	il.RedrawList(g)
 
-    return nil
+	return nil
 }
+
+//func (il *IssueList) getLocalIssueUtil()
