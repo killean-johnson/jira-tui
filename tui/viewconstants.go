@@ -60,4 +60,7 @@ const (
 
 	// Helpbar constants
 	HELPBAR = "helpbar"
+
+	// MessageBox constants
+	MESSAGEBOX = "messagebox"
 )

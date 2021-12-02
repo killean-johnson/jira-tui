@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -34,7 +33,9 @@ func (pl *ProjectList) SelectProject(g *gocui.Gui, v *gocui.View) error {
 
 	// Throw an error if there is no active sprint on this project
 	if len(sprints) < 1 {
-		return errors.New("No active sprint on project!")
+		pl.parent.mb.previousView = v.Name()
+		pl.parent.mb.ShowMessageBox(g, "No active sprint on selected project!")
+		return nil
 	}
 
 	// Transfer the info to the parent

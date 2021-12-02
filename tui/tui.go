@@ -33,6 +33,7 @@ type TUI struct {
 	es *EditStatus
 	ea *EditAssignee
 	hb *Helpbar
+	mb *MessageBox
 }
 
 func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
@@ -56,31 +57,15 @@ func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
 	t.gui.InputEsc = true
 
 	// Set up the layouts
-	t.pl = new(ProjectList)
-	t.il = new(IssueList)
-	t.iv = new(IssueView)
-	t.ic = new(IssueCreate)
-	t.ed = new(EditDesc)
-	t.es = new(EditStatus)
-	t.ea = new(EditAssignee)
-	t.hb = new(Helpbar)
-
-	t.pl.parent = t
-	t.il.parent = t
-	t.iv.parent = t
-	t.ic.parent = t
-	t.ed.parent = t
-	t.es.parent = t
-	t.ea.parent = t
-	t.hb.parent = t
-	t.pl.client = t.client
-	t.il.client = t.client
-	t.iv.client = t.client
-	t.ic.client = t.client
-	t.ed.client = t.client
-	t.es.client = t.client
-	t.ea.client = t.client
-	t.hb.client = t.client
+	t.pl = &ProjectList{parent: t, client: t.client}
+	t.il = &IssueList{parent: t, client: t.client}
+	t.iv = &IssueView{parent: t, client: t.client}
+	t.ic = &IssueCreate{parent: t, client: t.client}
+	t.ed = &EditDesc{parent: t, client: t.client}
+	t.es = &EditStatus{parent: t, client: t.client}
+	t.ea = &EditAssignee{parent: t, client: t.client}
+	t.hb = &Helpbar{parent: t, client: t.client}
+	t.mb = &MessageBox{}
 
 	// Setting up keymaps has to happen AFTER the layouts are created
 	t.SetupProjectLayoutKeymap()

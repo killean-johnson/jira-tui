@@ -11,22 +11,22 @@ import (
 )
 
 type Config struct {
-    Email string
-    APIToken string
-    JiraURL string
-    Project []LayoutStruct
-    Issue []LayoutStruct
+	Email    string
+	APIToken string
+	JiraURL  string
+	Project  []LayoutStruct
+	Issue    []LayoutStruct
 }
 
 type LayoutStruct struct {
-    View string
-    Keys []Keybinding
+	View string
+	Keys []Keybinding
 }
 
 type Keybinding struct {
-    Name string
-    Key string
-    Description string
+	Name        string
+	Key         string
+	Description string
 }
 
 func MarshalPrint(obj interface{}) {
@@ -35,14 +35,14 @@ func MarshalPrint(obj interface{}) {
 }
 
 func (kb *Config) LoadConfig() error {
-    home, err := os.UserHomeDir()
-    if err != nil {
-        return err
-    }
-    configPath := filepath.Join(home, ".config", "jira-tui")
-    configFile := filepath.Join(configPath, "config.json")
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	configPath := filepath.Join(home, ".config", "jira-tui")
+	configFile := filepath.Join(configPath, "config.json")
 
-    // If the file doesn't exist, make the folder structure and a default config
+	// If the file doesn't exist, make the folder structure and a default config
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(configFile), 0770); err != nil {
 			log.Fatal("Error creating config file")
@@ -51,32 +51,32 @@ func (kb *Config) LoadConfig() error {
 		createDefaultConfig(configFile)
 	}
 
-    viper.AddConfigPath(configPath)
-    viper.SetConfigName("config")
-    viper.SetConfigType("json")
+	viper.AddConfigPath(configPath)
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
 
-    viper.AutomaticEnv()
+	viper.AutomaticEnv()
 
-    err = viper.ReadInConfig()
-    if err != nil {
-        return err
-    }
+	err = viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
 
-    err = viper.Unmarshal(&kb)
-    if err != nil {
-        return err
-    }
+	err = viper.Unmarshal(&kb)
+	if err != nil {
+		return err
+	}
 
-    return nil
+	return nil
 }
 
 func createDefaultConfig(configFile string) error {
-    file, err := os.Create(configFile)
-    if err != nil {
-        return err
-    }
+	file, err := os.Create(configFile)
+	if err != nil {
+		return err
+	}
 
-    defaultConfigString := []byte(`{
+	defaultConfigString := []byte(`{
     "email": "",
     "apitoken": "",
     "jiraurl": "",
@@ -307,12 +307,22 @@ func createDefaultConfig(configFile string) error {
                     "description": "Cancel"
                 }
             ]
+        },
+        {
+            "view": "messagebox",
+            "keys": [
+                {
+                    "name": "mbexit",
+                    "key": "<ENTER>",
+                    "description": "Clear Messagebox"
+                }
+            ]
         }
     ]
 }`)
-    _, err = file.Write(defaultConfigString)
-    if err != nil {
-        return err
-    }
-    return nil
+	_, err = file.Write(defaultConfigString)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -11,6 +11,10 @@ type JiraClient struct {
 	client *jira.Client
 }
 
+func (jc *JiraClient) GetConnection() *jira.Client {
+	return jc.client
+}
+
 func (jc *JiraClient) Connect(username string, token string, url string) {
 	// Set up client
 	authTransport := jira.BasicAuthTransport{
@@ -48,11 +52,11 @@ func (jc *JiraClient) GetBoardList() ([]jira.Board, error) {
 }
 
 func (jc *JiraClient) GetBoard(boardId int) (*jira.Board, error) {
-    board, _, err := jc.client.Board.GetBoard(boardId)
-    if err != nil {
-        return nil, err
-    }
-    return board, nil
+	board, _, err := jc.client.Board.GetBoard(boardId)
+	if err != nil {
+		return nil, err
+	}
+	return board, nil
 }
 
 func (jc *JiraClient) GetSprintList(boardId int) ([]jira.Sprint, error) {
@@ -67,7 +71,7 @@ func (jc *JiraClient) GetSprintList(boardId int) ([]jira.Sprint, error) {
 
 // get all statuses that a jira card could be in
 func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
-	statuses, _, err := jc.client.StatusCategory.GetList()
+	statuses, _, err := jc.client.StatusCategory.GetList() //jc.client.Status.GetAllStatuses() //.StatusCategory.GetList()
 	if err != nil {
 		return nil, err
 	}
@@ -76,68 +80,68 @@ func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
 
 // Get all the issues on a sprint
 func (jc *JiraClient) GetIssuesForSprint(sprintId int) ([]jira.Issue, error) {
-    issues, _, err := jc.client.Issue.Search("Sprint=" + fmt.Sprint(sprintId), &jira.SearchOptions {
-        Fields: []string{"summary", "status", "assignee", "description", "sprint", "project"},
-    })
+	issues, _, err := jc.client.Issue.Search("Sprint="+fmt.Sprint(sprintId), &jira.SearchOptions{
+		Fields: []string{"summary", "status", "assignee", "description", "sprint", "project"},
+	})
 	if err != nil {
 		return nil, err
 	}
-    return issues, nil
+	return issues, nil
 }
 
 func (jc *JiraClient) GetIssue(issueId string) (*jira.Issue, error) {
-    issue, _, err := jc.client.Issue.Get(issueId, nil)
-    if err != nil {
-        return nil, err
-    }
-    return issue, nil
+	issue, _, err := jc.client.Issue.Get(issueId, nil)
+	if err != nil {
+		return nil, err
+	}
+	return issue, nil
 }
 
 func (jc *JiraClient) UpdateIssue(issue *jira.Issue) error {
-    _, _, err := jc.client.Issue.Update(issue) 
-    return err
+	_, _, err := jc.client.Issue.Update(issue)
+	return err
 }
 
 func (jc *JiraClient) DoTransition(issueKey string, transitionName string) error {
-    var transitionId string
-    transitions, _, _ := jc.client.Issue.GetTransitions(issueKey)
-    for _, t := range(transitions) {
-        if t.Name == transitionName {
-            transitionId = t.ID
-            break
-        }
-    }
-    _, err := jc.client.Issue.DoTransition(issueKey, transitionId)
-    return err
+	var transitionId string
+	transitions, _, _ := jc.client.Issue.GetTransitions(issueKey)
+	for _, t := range transitions {
+		if t.Name == transitionName {
+			transitionId = t.ID
+			break
+		}
+	}
+	_, err := jc.client.Issue.DoTransition(issueKey, transitionId)
+	return err
 }
 
 func (jc *JiraClient) CreateIssue(issue *jira.Issue) (*jira.Issue, error) {
-    is, _, err := jc.client.Issue.Create(issue)
-    if err != nil {
-        return nil, err
-    }
+	is, _, err := jc.client.Issue.Create(issue)
+	if err != nil {
+		return nil, err
+	}
 
-    activeSprint, err := jc.GetActiveSprint()
-    if err != nil {
-        return nil, err
-    }
+	activeSprint, err := jc.GetActiveSprint()
+	if err != nil {
+		return nil, err
+	}
 
-    _, err = jc.client.Sprint.MoveIssuesToSprint(activeSprint.ID, []string{is.Key})
-    if err != nil {
-        return nil, err
-    }
+	_, err = jc.client.Sprint.MoveIssuesToSprint(activeSprint.ID, []string{is.Key})
+	if err != nil {
+		return nil, err
+	}
 
-    return is, nil
+	return is, nil
 }
 
 func (jc *JiraClient) GetActiveSprint() (*jira.Sprint, error) {
-    sprints, _, err := jc.client.Board.GetAllSprintsWithOptions(6, &jira.GetAllSprintsOptions{ 
-        State: "active",
-    })
-    if err != nil {
-        return nil, err
-    }
-    return &sprints.Values[0], nil
+	sprints, _, err := jc.client.Board.GetAllSprintsWithOptions(6, &jira.GetAllSprintsOptions{
+		State: "active",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &sprints.Values[0], nil
 }
 
 func (jc *JiraClient) GetUsers(boardKey string) (*[]jira.User, error) {
@@ -145,18 +149,18 @@ func (jc *JiraClient) GetUsers(boardKey string) (*[]jira.User, error) {
 		Path: "/rest/api/2/user/assignable/multiProjectSearch",
 	}
 	uv := url.Values{}
-    uv.Add("projectKeys", boardKey)
-    uv.Add("startAt", "0")
-    uv.Add("maxResults", "50")
+	uv.Add("projectKeys", boardKey)
+	uv.Add("startAt", "0")
+	uv.Add("maxResults", "50")
 
 	u.RawQuery = uv.Encode()
 
-    req, _ := jc.client.NewRequest("GET", u.String(), nil)
+	req, _ := jc.client.NewRequest("GET", u.String(), nil)
 
-    users := new([]jira.User)
-    _, err := jc.client.Do(req, users)
-    if err != nil {
-        return nil, err
-    }
-    return users, nil
+	users := new([]jira.User)
+	_, err := jc.client.Do(req, users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
