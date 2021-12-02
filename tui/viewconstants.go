@@ -20,6 +20,7 @@ const (
 	ILQUIT            = "ilquit"
 
 	// Issue view constants
+	ISSUEVIEW    = "issueview"
 	IVCURSORDOWN = "ivcursordown"
 	IVCURSORUP   = "ivcursorup"
 

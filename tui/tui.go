@@ -144,15 +144,15 @@ func (t *TUI) SetupProjectLayout() error {
 func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	t.keymap[ILCURSORDOWN] = cursorDown
 	t.keymap[ILCURSORUP] = cursorUp
-	// t.keymap[ILSELECTISSUE] = il.selectIssue
+	t.keymap[ILSELECTISSUE] = t.il.SelectIssue
 	// t.keymap[ILEDITDESCRIPTION] = il.editDescDialogue
 	// t.keymap[ILEDITSTATUS] = il.editStatusDialogue
 	// t.keymap[ILEDITASSIGNEE] = il.editAssigneeDialogue
 	// t.keymap[ILADDISSUE] = il.createIssueDialogue
 	t.keymap[ILQUIT] = t.Quit
 
-	// t.keymap[IVCURSORDOWN] = cursorDown
-	// t.keymap[IVCURSORUP] = cursorUp
+	t.keymap[IVCURSORDOWN] = cursorDown
+	t.keymap[IVCURSORUP] = cursorUp
 
 	// t.keymap[EDCONFIRM] = il.confirmEditDesc
 	// t.keymap[EDCANCEL] = il.cancelEditDesc

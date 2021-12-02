@@ -1,7 +1,9 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
@@ -16,47 +18,24 @@ type IssueList struct {
 }
 
 func (il *IssueList) SelectIssue(g *gocui.Gui, v *gocui.View) error {
-	/* // Get the string from the currently highlighted line
+	// Get the string from the currently highlighted line
 	_, cy := v.Cursor()
 	l, err := v.Line(cy)
 	if err != nil {
 		l = ""
 	}
 
-	// Switch to the issue view
-	if v, err = il.SetCurrentView("issueview"); err != nil {
-		return err
-	}
-
-	// Clear out any previously written info
-	v.Clear()
-
-	// Match the ID from the string up with the one in our issue list
-	id := strings.Trim(strings.Split(l, "|")[0], " ")
-	var foundIssue *jira.Issue = il.getLocalIssueUtil(id)
+	// Match the key from the string up with the one in our issue list
+	key := strings.Trim(strings.Split(l, "|")[0], " ")
+	var foundIssue *jira.Issue = il.findIssue(key)
 
 	// Do nothing if the issue wasn't found
 	if foundIssue == nil {
-		return nil
+		return errors.New("Failed to find issue in list!")
 	}
 
-	// Update our actively selected issue
-	il.activeIssue = foundIssue
-
-	// Display the issue information in the issueinfo view
-	assignee := ""
-	if foundIssue.Fields.Assignee != nil {
-		assignee = foundIssue.Fields.Assignee.DisplayName
-	} else {
-		assignee = "Unassigned"
-	}
-	fmt.Fprintf(v, "%s\nAssigned To %s\nStatus: %s\nSummary: %s\nDescription: %s\n",
-		foundIssue.Key, assignee, foundIssue.Fields.Status.StatusCategory.Name, foundIssue.Fields.Summary, foundIssue.Fields.Description)
-
-	// Return to the issuelist view
-	if _, err := g.SetCurrentView("issuelist"); err != nil {
-		return err
-	} */
+	// Update our actively selected issue in the issueview
+	il.parent.iv.activeIssue = foundIssue
 
 	return nil
 }
@@ -121,4 +100,11 @@ func (il *IssueList) Layout(g *gocui.Gui) error {
 	return nil
 }
 
-//func (il *IssueList) getLocalIssueUtil()
+func (il *IssueList) findIssue(key string) *jira.Issue {
+	for _, issue := range il.issues {
+		if issue.Key == key {
+			return &issue
+		}
+	}
+	return nil
+}
