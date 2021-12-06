@@ -66,9 +66,9 @@ func (il *IssueList) RedrawList(g *gocui.Gui) error {
 		}
 
 		if is.Fields.Assignee != nil {
-			issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.StatusCategory.Name)
+			issueInfo = fmt.Sprintf("%-20s | %-12s", is.Fields.Assignee.DisplayName, is.Fields.Status.Name)
 		} else {
-			issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.StatusCategory.Name)
+			issueInfo = fmt.Sprintf("%-20s | %-12s", "Unassigned", is.Fields.Status.Name)
 		}
 
 		fmt.Fprintf(issueView, "%-"+fmt.Sprint(issueTextWidth)+"s | %-"+fmt.Sprint(issueInfoWidth)+"s\n", issueText, issueInfo)

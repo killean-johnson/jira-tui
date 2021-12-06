@@ -34,7 +34,7 @@ func (iv *IssueView) Layout(g *gocui.Gui) error {
 				assignee = "Unassigned"
 			}
 			fmt.Fprintf(v, "%s\nAssigned To %s\nStatus: %s\nSummary: %s\nDescription: %s\n",
-				iv.activeIssue.Key, assignee, iv.activeIssue.Fields.Status.StatusCategory.Name, iv.activeIssue.Fields.Summary, iv.activeIssue.Fields.Description)
+				iv.activeIssue.Key, assignee, iv.activeIssue.Fields.Status.Name, iv.activeIssue.Fields.Summary, iv.activeIssue.Fields.Description)
 		}
 	}
 
