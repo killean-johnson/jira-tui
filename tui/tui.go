@@ -310,8 +310,6 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 					return err
 				}
 			}
-		} else {
-			return err
 		}
 	}
 	return nil
