@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/killean-johnson/jira-tui/api"
 	"github.com/killean-johnson/jira-tui/config"
 	"github.com/killean-johnson/jira-tui/tui"
@@ -19,7 +17,7 @@ func main() {
 	// Set up the client connection
 	client := &api.JiraClient{}
 	client.Connect(conf.Email, conf.APIToken, conf.JiraURL)
-	issueKey := "VV-392"
+	/* issueKey := "VV-392"
 	transitions, _, _ := client.GetConnection().Issue.GetTransitions(issueKey)
 	for _, tran := range transitions {
 		fmt.Printf("%#v\n", tran)
@@ -35,7 +33,7 @@ func main() {
 
 	_, err = client.GetConnection().Issue.DoTransition(issueKey, tid)
 	panic(err)
-	return
+	return */
 	//client.Issue.GetTransitions(issueKey)
 	// Run the TUI
 	t := new(tui.TUI)

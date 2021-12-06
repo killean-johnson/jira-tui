@@ -63,4 +63,5 @@ const (
 
 	// MessageBox constants
 	MESSAGEBOX = "messagebox"
+	MBCLEAR    = "mbclear"
 )

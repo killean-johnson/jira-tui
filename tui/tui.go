@@ -104,6 +104,8 @@ func (t *TUI) SetupProjectLayoutKeymap() error {
 	t.keymap[PLCURSORUP] = cursorUp
 	t.keymap[PLSELECT] = t.pl.SelectProject
 	t.keymap[PLQUIT] = t.Quit
+
+	t.keymap[MBCLEAR] = t.mb.ExitMessageBox
 	return nil
 }
 
@@ -118,7 +120,7 @@ func (t *TUI) ProjectLayoutKeybind() error {
 
 func (t *TUI) SetupProjectLayout() error {
 	// Set up the starting manager and the keymap for it
-	t.gui.SetManager(t, t.pl, t.hb)
+	t.gui.SetManager(t, t.pl, t.hb, t.mb)
 	if err := t.ProjectLayoutKeybind(); err != nil {
 		return err
 	}
@@ -166,6 +168,8 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	// t.keymap[CIDCYCLE] = il.cycleCreateIssueWidgets
 	// t.keymap[CIDCONFIRM] = il.confirmCreateIssue
 	// t.keymap[CIDCANCEL] = il.cancelCreateIssue
+
+	t.keymap[MBCLEAR] = t.mb.ExitMessageBox
 	return nil
 }
 
