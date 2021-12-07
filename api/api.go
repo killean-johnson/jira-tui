@@ -68,37 +68,37 @@ func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
 
 // Get all the issues on a sprint
 func (jc *JiraClient) GetIssuesForSprint(sprintId int) ([]jira.Issue, error) {
-    issues, _, err := jc.client.Issue.Search("Sprint=" + fmt.Sprint(sprintId), &jira.SearchOptions {
-        Fields: []string{"summary", "status", "assignee"},
-    })
+	issues, _, err := jc.client.Issue.Search("Sprint="+fmt.Sprint(sprintId), &jira.SearchOptions{
+		Fields: []string{"summary", "status", "assignee"},
+	})
 	if err != nil {
 		return nil, err
 	}
-    return issues, nil
+	return issues, nil
 }
 
 func (jc *JiraClient) GetIssue(issueId string) (*jira.Issue, error) {
-    issue, _, err := jc.client.Issue.Get(issueId, nil)
-    if err != nil {
-        return nil, err
-    }
-    return issue, nil
+	issue, _, err := jc.client.Issue.Get(issueId, nil)
+	if err != nil {
+		return nil, err
+	}
+	return issue, nil
 }
 
 func (jc *JiraClient) UpdateIssue(issue *jira.Issue) error {
-    _, _, err := jc.client.Issue.Update(issue) 
-    return err
+	_, _, err := jc.client.Issue.Update(issue)
+	return err
 }
 
 func (jc *JiraClient) DoTransition(issueKey string, transitionName string) error {
-    var transitionId string
-    transitions, _, _ := jc.client.Issue.GetTransitions(issueKey)
-    for _, t := range(transitions) {
-        if t.Name == transitionName {
-            transitionId = t.ID
-            break
-        }
-    }
-    _, err := jc.client.Issue.DoTransition(issueKey, transitionId)
-    return err
+	var transitionId string
+	transitions, _, _ := jc.client.Issue.GetTransitions(issueKey)
+	for _, t := range transitions {
+		if t.Name == transitionName {
+			transitionId = t.ID
+			break
+		}
+	}
+	_, err := jc.client.Issue.DoTransition(issueKey, transitionId)
+	return err
 }

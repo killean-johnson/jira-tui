@@ -83,20 +83,25 @@ func newBoardModel(common *commonModel) BoardModel {
 }
 
 func (m BoardModel) View() string {
-	return "\n" + m.boardsList.View()
+	return m.common.testState + "\n" + m.boardsList.View()
+}
+
+func addIssuesList(m BoardModel) tea.Cmd {
+	return func() tea.Msg {
+		return newIssuesList{boardId: m.selectedBoard.ID}
+	}
 }
 
 func updateState(m BoardModel) tea.Cmd {
 	return func() tea.Msg {
 		if m.selectedBoard != nil {
-			return updateModelState(stateShowIssues)
+			return updateModelState{state: stateShowIssues}
 		}
 		return nil
 	}
-
 }
 func (m BoardModel) Update(msg tea.Msg) (BoardModel, tea.Cmd) {
-	var cmds []tea.Cmd
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		top, right, bottom, left := docStyle.GetMargin()
@@ -105,12 +110,10 @@ func (m BoardModel) Update(msg tea.Msg) (BoardModel, tea.Cmd) {
 		switch msg.String() {
 		case "enter":
 			m.selectedBoard = &(m.boards[m.boardsList.Index()])
-			cmds = append(cmds, updateState(m))
-			return m, nil
+			return m, addIssuesList(m)
 		}
 	}
 
-	var cmd tea.Cmd
 	m.boardsList, cmd = m.boardsList.Update(msg)
 	return m, cmd
 }

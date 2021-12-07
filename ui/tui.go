@@ -15,27 +15,37 @@ const (
 )
 
 type commonModel struct {
-	jc    *api.JiraClient
-	width int
+	jc        *api.JiraClient
+	width     int
+	height    int
+	testState string
 }
 
 type Tui struct {
-	common    *commonModel
-	uiState   uiState
-	boardList BoardModel
+	common      *commonModel
+	uiState     uiState
+	boardModel  BoardModel
+	issuesModel IssuesModel
 }
 
-type updateModelState uiState
+type updateModelState struct {
+	state uiState
+}
+
+type newIssuesList struct {
+	boardId int
+}
 
 func InitialTui(client *api.JiraClient) Tui {
 	common := commonModel{
-		jc:    client,
-		width: 80,
+		jc:        client,
+		width:     80,
+		testState: "boards",
 	}
 	return Tui{
-		common:    &common,
-		uiState:   stateShowBoards,
-		boardList: newBoardModel(&common),
+		common:     &common,
+		uiState:    stateShowBoards,
+		boardModel: newBoardModel(&common),
 	}
 }
 
@@ -46,9 +56,9 @@ func (t Tui) Init() tea.Cmd {
 func (t Tui) View() string {
 	switch t.uiState {
 	case stateShowBoards:
-		return t.boardList.View()
+		return t.boardModel.View()
 	default:
-		return t.boardList.View()
+		return "issues"
 	}
 }
 
@@ -58,18 +68,28 @@ func (t Tui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		t.common.width = msg.Width
+		t.common.height = msg.Height
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q":
 			return t, tea.Quit
 		}
 	case updateModelState:
+		t.common.testState = "issues"
+		t.uiState = msg.state
+
+	case newIssuesList:
+		t.issuesModel = newIssuesModel(t.common, msg.boardId)
 		t.uiState = stateShowIssues
 	}
 	switch t.uiState {
-	case stateShowBoards:
-		newBoardsModel, cmd := t.boardList.Update(msg)
-		t.boardList = newBoardsModel
+	cas estateShowBoards:
+		newBoardsModel, cmd := t.boardModel.Update(msg)
+		t.boardModel = newBoardsModel
+		cmds = append(cmds, cmd)
+	case stateShowIssues:
+		newIssuesModel, cmd := t.issuesModel.Update(msg)
+		t.issuesModel = newIssuesModel
 		cmds = append(cmds, cmd)
 	}
 
