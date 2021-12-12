@@ -105,6 +105,16 @@ func createDefaultConfig(configFile string) error {
                     "description": "Quit"
                 }
             ]
+        },
+        {
+            "view": "messagebox",
+            "keys": [
+                {
+                    "name": "mbclear",
+                    "key": "<ENTER>",
+                    "description": "Clear Messagebox"
+                }
+            ]
         }
     ],
     "issue": [
@@ -312,7 +322,7 @@ func createDefaultConfig(configFile string) error {
             "view": "messagebox",
             "keys": [
                 {
-                    "name": "mbexit",
+                    "name": "mbclear",
                     "key": "<ENTER>",
                     "description": "Clear Messagebox"
                 }
