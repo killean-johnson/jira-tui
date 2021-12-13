@@ -17,6 +17,7 @@ type IssueList struct {
 	issues []jira.Issue
 }
 
+// Selects the highlighted issue and sets it as the active issue
 func (il *IssueList) SelectIssue(g *gocui.Gui, v *gocui.View) error {
 	// Get the string from the currently highlighted line
 	_, cy := v.Cursor()
