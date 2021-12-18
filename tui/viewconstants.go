@@ -25,6 +25,7 @@ const (
 	IVCURSORUP   = "ivcursorup"
 
 	// Edit description constants
+	EDITDESC  = "editdesc"
 	EDCONFIRM = "edconfirm"
 	EDCANCEL  = "edcancel"
 

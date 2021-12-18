@@ -2,9 +2,9 @@ package tui
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
 	"github.com/killean-johnson/jira-tui/config"
@@ -132,17 +132,17 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	t.keymap[ILCURSORDOWN] = cursorDown
 	t.keymap[ILCURSORUP] = cursorUp
 	t.keymap[ILSELECTISSUE] = t.il.SelectIssue
-	// t.keymap[ILEDITDESCRIPTION] = il.editDescDialogue
-	// t.keymap[ILEDITSTATUS] = il.editStatusDialogue
-	// t.keymap[ILEDITASSIGNEE] = il.editAssigneeDialogue
+	t.keymap[ILEDITDESCRIPTION] = t.ed.Dialogue
+	//t.keymap[ILEDITSTATUS] = il.editStatusDialogue
+	//t.keymap[ILEDITASSIGNEE] = il.editAssigneeDialogue
 	t.keymap[ILADDISSUE] = t.ic.Dialogue
 	t.keymap[ILQUIT] = t.Quit
 
 	t.keymap[IVCURSORDOWN] = cursorDown
 	t.keymap[IVCURSORUP] = cursorUp
 
-	// t.keymap[EDCONFIRM] = il.confirmEditDesc
-	// t.keymap[EDCANCEL] = il.cancelEditDesc
+	t.keymap[EDCONFIRM] = t.ed.Confirm
+	t.keymap[EDCANCEL] = t.ed.Cancel
 
 	// t.keymap[ESCURSORDOWN] = cursorDown
 	// t.keymap[ESCURSORUP] = cursorUp
@@ -184,7 +184,7 @@ func (t *TUI) IssueViewLayoutKeybind() error {
 
 func (t *TUI) SetupIssueViewLayout() error {
 	// Set up the starting manager and the keymap for it
-	t.gui.SetManager(t, t.il, t.iv, t.ic, t.hb)
+	t.gui.SetManager(t, t.il, t.iv, t.ic, t.ed, t.hb)
 	if err := t.IssueViewLayoutKeybind(); err != nil {
 		return err
 	}
@@ -279,6 +279,18 @@ func (t *TUI) Layout(g *gocui.Gui) error {
 	return nil
 }
 
+func (t *TUI) ActiveIssue() *jira.Issue {
+    return t.iv.activeIssue
+}
+
+func (t *TUI) Issues() *[]jira.Issue {
+    return &t.il.issues
+}
+
+func (t *TUI) ShowMessageBox(msg string) error {
+    return t.mb.ShowMessageBox(t.gui, msg)
+}
+
 func (t *TUI) Quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
@@ -313,89 +325,4 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 		}
 	}
 	return nil
-}
-
-func CreateTUI(client *api.JiraClient, conf *config.Config) {
-	gui, err := gocui.NewGui(gocui.OutputNormal)
-	if err != nil {
-		log.Panicln(err)
-	}
-	defer gui.Close()
-
-	gui.InputEsc = true
-
-	var bl *BoardLayout = new(BoardLayout)
-	bl.client = client
-	bl.gui = gui
-	bl.config = conf
-	bl.keymap = make(map[string]func(*gocui.Gui, *gocui.View) error)
-	bl.keymap["blcursordown"] = cursorDown
-	bl.keymap["blcursorup"] = cursorUp
-	bl.keymap["blselect"] = bl.switchToIssueLayout
-	bl.keymap["blquit"] = boardQuit
-
-	var helpbar = make(chan string)
-	bl.helpbar = &helpbar
-
-	go func(hb chan string, gui *gocui.Gui) error {
-		for {
-			var helptext = <-hb
-			gui.Update(func(gui *gocui.Gui) error {
-				curView := gui.CurrentView()
-				maxX, maxY := gui.Size()
-				v, err := gui.SetView(HELPBAR, 0, maxY-3, maxX-1, maxY-1)
-				if err != nil && err != gocui.ErrUnknownView {
-					panic(err)
-				} else if err == gocui.ErrUnknownView {
-					v.Title = "Keybindings"
-				}
-				gui.SetViewOnTop(v.Name())
-
-				v.Clear()
-				fmt.Fprintf(v, "%s", helptext)
-
-				if curView != nil {
-					gui.SetCurrentView(curView.Name())
-				}
-
-				return nil
-			})
-		}
-	}(helpbar, gui)
-
-	gui.SetManagerFunc(bl.Layout)
-
-	if err := bl.boardLayoutKeybindings(); err != nil {
-		log.Panicln(err)
-	}
-
-	if err := gui.MainLoop(); err != nil && err != gocui.ErrQuit {
-		log.Panicln(err)
-	}
-}
-
-func updateHelpbar(helpbar chan string, gui *gocui.Gui, conf *config.Config) {
-	curView := gui.CurrentView()
-
-	if curView != nil {
-		helpString := ""
-		for _, l := range conf.Project {
-			if l.View == curView.Name() {
-				for _, key := range l.Keys {
-					helpString += fmt.Sprintf("| %s - %s |", key.Key, key.Description)
-				}
-				break
-			}
-		}
-
-		for _, l := range conf.Issue {
-			if l.View == curView.Name() {
-				for _, key := range l.Keys {
-					helpString += fmt.Sprintf("| %s - %s |", key.Key, key.Description)
-				}
-				break
-			}
-		}
-		helpbar <- helpString
-	}
 }

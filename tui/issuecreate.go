@@ -118,8 +118,7 @@ func (ic *IssueCreate) Confirm(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	// Does all of the regular view cleanup
-	ic.Cancel(g, v)
-	return nil
+	return ic.Cancel(g, v)
 }
 
 func (ic *IssueCreate) Cancel(g *gocui.Gui, v *gocui.View) error {
