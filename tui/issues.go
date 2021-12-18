@@ -437,7 +437,7 @@ func (il *IssueLayout) confirmEditStatus(g *gocui.Gui, v *gocui.View) error {
 		for _, status := range statuses {
 			if status.Name == l {
 				newStatusId = fmt.Sprint(status.Name)
-				newStatus = status
+				//newStatus = status
 				break
 			}
 		}

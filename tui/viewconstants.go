@@ -30,13 +30,14 @@ const (
 	EDCANCEL  = "edcancel"
 
 	// Edit status constants
+	EDITSTATUS   = "editstatus"
 	ESCURSORDOWN = "escursordown"
 	ESCURSORUP   = "escursorup"
 	ESCONFIRM    = "esconfirm"
 	ESCANCEL     = "escancel"
 
 	// Edit assignee constants
-    EDITASSIGNEE = "editassignee"
+	EDITASSIGNEE = "editassignee"
 	EACURSORDOWN = "eacursordown"
 	EACURSORUP   = "eacursorup"
 	EACONFIRM    = "eaconfirm"

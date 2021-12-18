@@ -70,12 +70,20 @@ func (jc *JiraClient) GetSprintList(boardId int) ([]jira.Sprint, error) {
 }
 
 // get all statuses that a jira card could be in
-func (jc *JiraClient) GetStatusList() ([]jira.StatusCategory, error) {
-	statuses, _, err := jc.client.StatusCategory.GetList() //jc.client.Status.GetAllStatuses() //.StatusCategory.GetList()
+func (jc *JiraClient) GetStatusList() ([]jira.Status, error) {
+	statuses, _, err := jc.client.Status.GetAllStatuses()
 	if err != nil {
 		return nil, err
 	}
 	return statuses, nil
+}
+
+func (jc *JiraClient) GetIssueTransitions(id string) ([]jira.Transition, error) {
+    transitions, _, err := jc.client.Issue.GetTransitions(id)
+    if err != nil {
+        return nil, err
+    }
+    return transitions, nil
 }
 
 // Get all the issues on a sprint

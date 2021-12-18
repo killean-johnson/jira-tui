@@ -134,7 +134,7 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	t.keymap[ILCURSORUP] = cursorUp
 	t.keymap[ILSELECTISSUE] = t.il.SelectIssue
 	t.keymap[ILEDITDESCRIPTION] = t.ed.Dialogue
-	//t.keymap[ILEDITSTATUS] = il.editStatusDialogue
+	t.keymap[ILEDITSTATUS] = t.es.Dialogue
 	t.keymap[ILEDITASSIGNEE] = t.ea.Dialogue
 	t.keymap[ILADDISSUE] = t.ic.Dialogue
 	t.keymap[ILQUIT] = t.Quit
@@ -145,10 +145,10 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	t.keymap[EDCONFIRM] = t.ed.Confirm
 	t.keymap[EDCANCEL] = t.ed.Cancel
 
-	// t.keymap[ESCURSORDOWN] = cursorDown
-	// t.keymap[ESCURSORUP] = cursorUp
-	// t.keymap[ESCONFIRM] = il.confirmEditStatus
-	// t.keymap[ESCANCEL] = il.cancelEditStatus
+	t.keymap[ESCURSORDOWN] = cursorDown
+	t.keymap[ESCURSORUP] = cursorUp
+	t.keymap[ESCONFIRM] = t.es.Confirm
+	t.keymap[ESCANCEL] = t.es.Cancel
 
 	t.keymap[EACURSORDOWN] = cursorDown
 	t.keymap[EACURSORUP] = cursorUp
@@ -185,7 +185,7 @@ func (t *TUI) IssueViewLayoutKeybind() error {
 
 func (t *TUI) SetupIssueViewLayout() error {
 	// Set up the starting manager and the keymap for it
-	t.gui.SetManager(t, t.il, t.iv, t.ic, t.ed, t.ea, t.hb)
+	t.gui.SetManager(t, t.il, t.iv, t.ic, t.ed, t.ea, t.es, t.hb)
 	if err := t.IssueViewLayoutKeybind(); err != nil {
 		return err
 	}
