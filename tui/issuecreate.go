@@ -7,7 +7,6 @@ import (
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
 	"github.com/killean-johnson/jira-tui/api"
-	"github.com/killean-johnson/jira-tui/logger"
 )
 
 type IssueCreate struct {
@@ -99,7 +98,6 @@ func (ic *IssueCreate) Confirm(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	// Create the issue
-    // TODO: Need the project to be able to create the issue
 	issue := jira.Issue{
 		Fields: &jira.IssueFields{
 			Summary:     summary,
@@ -107,18 +105,17 @@ func (ic *IssueCreate) Confirm(g *gocui.Gui, v *gocui.View) error {
 			Type: jira.IssueType{
 				Name: "Story",
 			},
-            //Project: ic.client.GetProjectList(),
+			Project: jira.Project{
+                Key: ic.parent.activeProjectKey,
+            },
 			Assignee: assignee,
 		},
 	}
 
-    logger.InfoLogger.Printf("Issue: %#v\n", issue)
-
-    _, err = ic.client.CreateIssue(ic.parent.activeSprintId, &issue)
-    logger.InfoLogger.Printf("Error?: %#v\n", err)
-    if err != nil {
-        return err
-    }
+	_, err = ic.client.CreateIssue(ic.parent.activeSprintId, &issue)
+	if err != nil {
+		return err
+	}
 
 	// Does all of the regular view cleanup
 	ic.Cancel(g, v)

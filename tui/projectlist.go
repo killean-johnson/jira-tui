@@ -38,6 +38,7 @@ func (pl *ProjectList) SelectProject(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	// Transfer the info to the parent
+    pl.parent.activeProjectKey = strings.Split(strings.Split(l, "|")[1], " ")[0]
 	pl.parent.activeBoardId = boardId
 	pl.parent.activeSprintId = sprints[0].ID
 
