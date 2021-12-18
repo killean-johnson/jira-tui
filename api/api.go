@@ -31,30 +31,14 @@ func (jc *JiraClient) Connect(username string, token string, url string) {
 	}
 }
 
-// Get all projects
-func (jc *JiraClient) GetProjectList() (*jira.ProjectList, error) {
-	projects, _, err := jc.client.Project.GetList()
-	if err != nil {
-		return nil, err
-	}
-
-	return projects, nil
-}
-
-// TODO: This isn't right, find a way to get the project
+// TODO: Fix this, it doesn't actually work
 func (jc *JiraClient) GetProject(projectKey string) (*jira.Project, error) {
-    projectList, err := jc.GetProjectList()
+    project, _, err := jc.client.Project.Get(projectKey)
     if err != nil {
         return nil, err
     }
 
-    for _, project := range(*projectList) {
-        if project.Key == projectKey {
-            return &jira.Project{}, nil
-        }
-    }
-
-    return nil, nil
+    return project, nil
 }
 
 // get all boards that exist on project
@@ -145,8 +129,8 @@ func (jc *JiraClient) CreateIssue(sprintId int, issue *jira.Issue) (*jira.Issue,
 	return is, nil
 }
 
-func (jc *JiraClient) GetActiveSprint() (*jira.Sprint, error) {
-	sprints, _, err := jc.client.Board.GetAllSprintsWithOptions(6, &jira.GetAllSprintsOptions{
+func (jc *JiraClient) GetActiveSprint(boardId int) (*jira.Sprint, error) {
+	sprints, _, err := jc.client.Board.GetAllSprintsWithOptions(boardId, &jira.GetAllSprintsOptions{
 		State: "active",
 	})
 	if err != nil {
