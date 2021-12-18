@@ -57,15 +57,16 @@ func (t *TUI) SetupTUI(client *api.JiraClient, conf *config.Config) error {
 	t.gui.InputEsc = true
 
 	// Set up the layouts
-	t.pl = &ProjectList{parent: t, client: t.client}
-	t.il = &IssueList{parent: t, client: t.client}
-	t.iv = &IssueView{parent: t, client: t.client}
-	t.ic = &IssueCreate{parent: t, client: t.client}
-	t.ed = &EditDesc{parent: t, client: t.client}
-	t.es = &EditStatus{parent: t, client: t.client}
-	t.ea = &EditAssignee{parent: t, client: t.client}
-	t.hb = &Helpbar{parent: t, client: t.client}
-	t.mb = &MessageBox{}
+    parentWidget := Widget{parent: t, client: t.client}
+    t.pl = &ProjectList{Widget: parentWidget}
+    t.il = &IssueList{Widget: parentWidget}
+    t.iv = &IssueView{Widget: parentWidget}
+    t.ic = &IssueCreate{Widget: parentWidget}
+    t.ed = &EditDesc{Widget: parentWidget}
+    t.es = &EditStatus{Widget: parentWidget}
+    t.ea = &EditAssignee{Widget: parentWidget}
+    t.hb = &Helpbar{Widget: parentWidget}
+    t.mb = &MessageBox{}
 
 	// Setting up keymaps has to happen AFTER the layouts are created
 	t.SetupProjectLayoutKeymap()
@@ -134,7 +135,7 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	t.keymap[ILSELECTISSUE] = t.il.SelectIssue
 	t.keymap[ILEDITDESCRIPTION] = t.ed.Dialogue
 	//t.keymap[ILEDITSTATUS] = il.editStatusDialogue
-	//t.keymap[ILEDITASSIGNEE] = il.editAssigneeDialogue
+	t.keymap[ILEDITASSIGNEE] = t.ea.Dialogue
 	t.keymap[ILADDISSUE] = t.ic.Dialogue
 	t.keymap[ILQUIT] = t.Quit
 
@@ -149,10 +150,10 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	// t.keymap[ESCONFIRM] = il.confirmEditStatus
 	// t.keymap[ESCANCEL] = il.cancelEditStatus
 
-	// t.keymap[EACURSORDOWN] = cursorDown
-	// t.keymap[EACURSORUP] = cursorUp
-	// t.keymap[EACONFIRM] = il.confirmEditAssignee
-	// t.keymap[EACANCEL] = il.cancelEditAssignee
+	t.keymap[EACURSORDOWN] = cursorDown
+	t.keymap[EACURSORUP] = cursorUp
+	t.keymap[EACONFIRM] = t.ea.Confirm
+	t.keymap[EACANCEL] = t.ea.Cancel
 
 	t.keymap[CISCYCLE] = t.ic.Cycle
 	t.keymap[CISCONFIRM] = t.ic.Confirm
@@ -184,7 +185,7 @@ func (t *TUI) IssueViewLayoutKeybind() error {
 
 func (t *TUI) SetupIssueViewLayout() error {
 	// Set up the starting manager and the keymap for it
-	t.gui.SetManager(t, t.il, t.iv, t.ic, t.ed, t.hb)
+	t.gui.SetManager(t, t.il, t.iv, t.ic, t.ed, t.ea, t.hb)
 	if err := t.IssueViewLayoutKeybind(); err != nil {
 		return err
 	}

@@ -36,6 +36,7 @@ const (
 	ESCANCEL     = "escancel"
 
 	// Edit assignee constants
+    EDITASSIGNEE = "editassignee"
 	EACURSORDOWN = "eacursordown"
 	EACURSORUP   = "eacursorup"
 	EACONFIRM    = "eaconfirm"
