@@ -41,6 +41,8 @@ func (il *IssueList) SelectIssue(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// Change the 
+
 func (il *IssueList) RedrawList(g *gocui.Gui) error {
 	issueView, err := g.View(ISSUELIST)
 	if err != nil {

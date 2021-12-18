@@ -220,7 +220,7 @@ func (il *IssueLayout) confirmCreateIssue(g *gocui.Gui, v *gocui.View) error {
 			},
 		}
 
-		_, err = il.client.CreateIssue(&i)
+		_, err = il.client.CreateIssue(0, &i)
 		if err != nil {
 			panic(err)
 		}

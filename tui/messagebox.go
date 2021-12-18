@@ -16,6 +16,8 @@ func (mb *MessageBox) ShowMessageBox(g *gocui.Gui, msg string) error {
 	mb.isActive = true
 	mb.message = msg
 
+    mb.previousView = g.CurrentView().Name()
+
 	maxX, maxY := g.Size()
 	if v, err := g.SetView(MESSAGEBOX, maxX/2-30, maxY/2, maxX/2+30, maxY/2+2); err != nil {
 		if err != gocui.ErrUnknownView {

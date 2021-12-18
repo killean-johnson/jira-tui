@@ -41,9 +41,13 @@ const (
 	EACANCEL     = "eacancel"
 
 	// Create issue summary constants
-	CISCYCLE   = "ciscycle"
-	CISCONFIRM = "cisconfirm"
-	CISCANCEL  = "ciscancel"
+	CIBACKGROUND  = "createissbackground"
+	CISUMMARY     = "createisssummary"
+	CIASSIGNEE    = "createissassignee"
+	CIDESCRIPTION = "createissdesc"
+	CISCYCLE      = "ciscycle"
+	CISCONFIRM    = "cisconfirm"
+	CISCANCEL     = "ciscancel"
 
 	// Create issue assignee constants
 	CIACURSORDOWN  = "ciacursordown"

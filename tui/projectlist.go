@@ -33,7 +33,6 @@ func (pl *ProjectList) SelectProject(g *gocui.Gui, v *gocui.View) error {
 
 	// Throw an error if there is no active sprint on this project
 	if len(sprints) < 1 {
-		pl.parent.mb.previousView = v.Name()
 		pl.parent.mb.ShowMessageBox(g, "No active sprint on selected project!")
 		return nil
 	}

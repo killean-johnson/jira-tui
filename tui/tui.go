@@ -135,7 +135,7 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	// t.keymap[ILEDITDESCRIPTION] = il.editDescDialogue
 	// t.keymap[ILEDITSTATUS] = il.editStatusDialogue
 	// t.keymap[ILEDITASSIGNEE] = il.editAssigneeDialogue
-	// t.keymap[ILADDISSUE] = il.createIssueDialogue
+	t.keymap[ILADDISSUE] = t.ic.Dialogue
 	t.keymap[ILQUIT] = t.Quit
 
 	t.keymap[IVCURSORDOWN] = cursorDown
@@ -154,20 +154,20 @@ func (t *TUI) SetupIssueViewLayoutKeymap() error {
 	// t.keymap[EACONFIRM] = il.confirmEditAssignee
 	// t.keymap[EACANCEL] = il.cancelEditAssignee
 
-	// t.keymap[CISCYCLE] = il.cycleCreateIssueWidgets
-	// t.keymap[CISCONFIRM] = il.confirmCreateIssue
-	// t.keymap[CISCANCEL] = il.cancelCreateIssue
+	t.keymap[CISCYCLE] = t.ic.Cycle
+	t.keymap[CISCONFIRM] = t.ic.Confirm
+	t.keymap[CISCANCEL] = t.ic.Cancel
 
-	// t.keymap[CIACURSORDOWN] = cursorDown
-	// t.keymap[CIACURSORUP] = cursorUp
-	// t.keymap[CIASETASSIGNEE] = il.setCreateIssueAssignee
-	// t.keymap[CIACYCLE] = il.cycleCreateIssueWidgets
-	// t.keymap[CIACONFIRM] = il.confirmCreateIssue
-	// t.keymap[CIACANCEL] = il.cancelCreateIssue
+	t.keymap[CIACURSORDOWN] = cursorDown
+	t.keymap[CIACURSORUP] = cursorUp
+	t.keymap[CIASETASSIGNEE] = t.ic.SetAssignee
+	t.keymap[CIACYCLE] = t.ic.Cycle
+    t.keymap[CIACONFIRM] = t.ic.Confirm
+	t.keymap[CIACANCEL] = t.ic.Cancel
 
-	// t.keymap[CIDCYCLE] = il.cycleCreateIssueWidgets
-	// t.keymap[CIDCONFIRM] = il.confirmCreateIssue
-	// t.keymap[CIDCANCEL] = il.cancelCreateIssue
+	t.keymap[CIDCYCLE] = t.ic.Cycle
+    t.keymap[CIDCONFIRM] = t.ic.Confirm
+	t.keymap[CIDCANCEL] = t.ic.Cancel
 
 	t.keymap[MBCLEAR] = t.mb.ExitMessageBox
 	return nil
@@ -184,7 +184,7 @@ func (t *TUI) IssueViewLayoutKeybind() error {
 
 func (t *TUI) SetupIssueViewLayout() error {
 	// Set up the starting manager and the keymap for it
-	t.gui.SetManager(t, t.il, t.iv, t.hb)
+	t.gui.SetManager(t, t.il, t.iv, t.ic, t.hb)
 	if err := t.IssueViewLayoutKeybind(); err != nil {
 		return err
 	}
