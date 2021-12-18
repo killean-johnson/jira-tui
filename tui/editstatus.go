@@ -5,32 +5,66 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
-	"github.com/killean-johnson/jira-tui/logger"
 )
 
 type EditStatus struct {
     Widget
 
-    statuses []jira.Status
+    transitions []jira.Transition
     isActive bool
 }
 
 func (es *EditStatus) Dialogue(g *gocui.Gui, v *gocui.View) error {
-    statuses, err := es.client.GetIssueTransitions(es.parent.ActiveIssue().ID)
-    if err != nil {
-        return err
-    }
-    for _, stat := range statuses {
-        logger.InfoLogger.Printf("%#v\n", stat)
+    if es.parent.ActiveIssue() != nil {
+        es.isActive = true
+    } else {
+        es.parent.ShowMessageBox("No issue selected!")
     }
     return nil
 }
 
 func (es *EditStatus) Confirm(g *gocui.Gui, v *gocui.View) error {
-    return nil
+    // Get the highlighted line
+    var l string
+    var err error
+    _, cy := v.Cursor()
+    if l, err = v.Line(cy); err != nil {
+        l = ""
+    }
+
+    // Get the actual transition object we want
+    var transition jira.Transition
+    for _, t := range es.transitions {
+        if t.Name == l {
+            transition = t
+        }
+    }
+
+    // Move the issue to the new status
+    err = es.client.DoTransition(es.parent.ActiveIssue().Key, transition.To.Name)
+    if err != nil {
+        return err
+    }
+    
+    // Update the local issue
+	for _, issue := range(*es.parent.Issues()) {
+		if issue.Key == es.parent.ActiveIssue().Key {
+			issue.Fields.Status = &transition.To
+            break
+		}
+	}
+
+    return es.Cancel(g, v)
 }
 
 func (es *EditStatus) Cancel(g *gocui.Gui, v *gocui.View) error {
+    if err := g.DeleteView(EDITSTATUS); err != nil {
+        return nil
+    }
+    if _, err := g.SetCurrentView(ISSUELIST); err != nil {
+        return err
+    }
+    es.isActive = false
     return nil
 }
 
@@ -47,13 +81,14 @@ func (es *EditStatus) Layout(g *gocui.Gui) error {
 			v.SelFgColor = gocui.ColorBlack
 			v.Title = "Set Status"
 
-            statuses, err := es.client.GetStatusList()
+            transitions, err := es.client.GetIssueTransitions(es.parent.ActiveIssue().ID)
             if err != nil {
                 return err
             }
+            es.transitions = transitions
 
-            for _, status := range statuses {
-                fmt.Fprintf(v, "%s\n", status.Name)
+            for _, transition := range transitions {
+                fmt.Fprintf(v, "%s\n", transition.Name)
             }
 
             if _, err := g.SetCurrentView(EDITSTATUS); err != nil {
