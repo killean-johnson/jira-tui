@@ -41,6 +41,22 @@ func (jc *JiraClient) GetProjectList() (*jira.ProjectList, error) {
 	return projects, nil
 }
 
+// TODO: This isn't right, find a way to get the project
+func (jc *JiraClient) GetProject(projectKey string) (*jira.Project, error) {
+    projectList, err := jc.GetProjectList()
+    if err != nil {
+        return nil, err
+    }
+
+    for _, project := range(*projectList) {
+        if project.Key == projectKey {
+            return &jira.Project{}, nil
+        }
+    }
+
+    return nil, nil
+}
+
 // get all boards that exist on project
 // loads project from userConfig
 func (jc *JiraClient) GetBoardList() ([]jira.Board, error) {
@@ -115,18 +131,13 @@ func (jc *JiraClient) DoTransition(issueKey string, transitionName string) error
 	return err
 }
 
-func (jc *JiraClient) CreateIssue(issue *jira.Issue) (*jira.Issue, error) {
+func (jc *JiraClient) CreateIssue(sprintId int, issue *jira.Issue) (*jira.Issue, error) {
 	is, _, err := jc.client.Issue.Create(issue)
 	if err != nil {
 		return nil, err
 	}
 
-	activeSprint, err := jc.GetActiveSprint()
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = jc.client.Sprint.MoveIssuesToSprint(activeSprint.ID, []string{is.Key})
+	_, err = jc.client.Sprint.MoveIssuesToSprint(sprintId, []string{is.Key})
 	if err != nil {
 		return nil, err
 	}
