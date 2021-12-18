@@ -212,7 +212,7 @@ func (bl *BoardLayout) Layout(g *gocui.Gui) error {
 			return err
 		}
 
-        updateHelpbar(*bl.helpbar, g, bl.config)
+        //updateHelpbar(*bl.helpbar, g, bl.config)
 	}
 
 	return nil

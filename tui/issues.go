@@ -25,13 +25,13 @@ type IssueLayout struct {
 
 func (il *IssueLayout) SetView(viewname string, x0, y0, x1, y1 int) (*gocui.View, error) {
 	v, err := il.gui.SetView(viewname, x0, y0, x1, y1)
-	updateHelpbar(*il.helpbar, il.gui, il.config)
+	//updateHelpbar(*il.helpbar, il.gui, il.config)
 	return v, err
 }
 
 func (il *IssueLayout) SetCurrentView(viewname string) (*gocui.View, error) {
 	v, err := il.gui.SetCurrentView(viewname)
-	updateHelpbar(*il.helpbar, il.gui, il.config)
+	//updateHelpbar(*il.helpbar, il.gui, il.config)
 	return v, err
 }
 
