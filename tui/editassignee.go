@@ -6,8 +6,8 @@ import (
 )
 
 type EditAssignee struct {
-    parent *TUI
-    client *api.JiraClient
+	Widget
+	isActive bool
 }
 
 func (pl *EditAssignee) Layout(g *gocui.Gui) error {

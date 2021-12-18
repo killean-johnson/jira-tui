@@ -7,12 +7,10 @@ import (
 	"time"
 
 	"github.com/jroimartin/gocui"
-	"github.com/killean-johnson/jira-tui/api"
 )
 
 type ProjectList struct {
-	parent *TUI
-	client *api.JiraClient
+    Widget
 }
 
 func (pl *ProjectList) SelectProject(g *gocui.Gui, v *gocui.View) error {

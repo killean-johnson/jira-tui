@@ -6,13 +6,10 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
-	"github.com/killean-johnson/jira-tui/api"
 )
 
 type IssueCreate struct {
-	parent *TUI
-	client *api.JiraClient
-
+    Widget
 	isActive     bool
 	activeWidget string
 }

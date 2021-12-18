@@ -7,13 +7,10 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/jroimartin/gocui"
-	"github.com/killean-johnson/jira-tui/api"
 )
 
 type IssueList struct {
-	parent *TUI
-	client *api.JiraClient
-
+    Widget
 	issues []jira.Issue
 }
 

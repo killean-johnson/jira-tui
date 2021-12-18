@@ -4,13 +4,10 @@ import (
 	"fmt"
 
 	"github.com/jroimartin/gocui"
-	"github.com/killean-johnson/jira-tui/api"
 )
 
 type Helpbar struct {
-    parent *TUI
-    client *api.JiraClient
-
+    Widget
     text string
 }
 
