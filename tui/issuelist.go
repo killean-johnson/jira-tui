@@ -3,6 +3,7 @@ package tui
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/andygrunwald/go-jira"
@@ -10,8 +11,32 @@ import (
 )
 
 type IssueList struct {
-    Widget
+	Widget
 	issues []jira.Issue
+}
+
+func issueSorter(issues []jira.Issue) func(int, int) bool {
+	return func(i, j int) bool {
+		if issues[i].Fields.Status.StatusCategory.Key > issues[j].Fields.Status.StatusCategory.Key {
+			return true
+		} else if issues[i].Fields.Status.StatusCategory.Key < issues[j].Fields.Status.StatusCategory.Key {
+			return false
+		}
+
+		var iname, jname string
+		if issues[i].Fields.Assignee == nil {
+			iname = "Unassigned"
+		} else {
+			iname = issues[i].Fields.Assignee.DisplayName
+		}
+		if issues[j].Fields.Assignee == nil {
+			jname = "Unassigned"
+		} else {
+			jname = issues[j].Fields.Assignee.DisplayName
+		}
+
+		return iname < jname
+	}
 }
 
 // Selects the highlighted issue and sets it as the active issue
@@ -38,8 +63,6 @@ func (il *IssueList) SelectIssue(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// Change the 
-
 func (il *IssueList) RedrawList(g *gocui.Gui) error {
 	issueView, err := g.View(ISSUELIST)
 	if err != nil {
@@ -55,6 +78,8 @@ func (il *IssueList) RedrawList(g *gocui.Gui) error {
 	titleIssueTextWidth := issueListWidth/3*2 - 9
 	issueInfoWidth := issueListWidth / 3
 	issueView.Title = fmt.Sprintf("%-5s | %-"+fmt.Sprint(titleIssueTextWidth)+"s | %-20s | %-12s", "Key", "Issue", "Assignee", "Status")
+
+	sort.SliceStable(il.issues, issueSorter(il.issues))
 
 	for _, is := range il.issues {
 		var issueText, issueInfo string
