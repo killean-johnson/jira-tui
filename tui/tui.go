@@ -260,8 +260,6 @@ func (t *TUI) Layout(g *gocui.Gui) error {
 	// Update the helpbar based on the present context
 	curView := g.CurrentView()
 	if curView != nil {
-		curView.Name()
-
 		// Gather all of the bindings in the current view
 		helpString := ""
 		allBindings := append(t.config.Project, t.config.Issue...)
