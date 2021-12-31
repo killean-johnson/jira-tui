@@ -19,10 +19,8 @@ Once that's done, it's good to go.
 All of the keybindings can be modified for any of the views. The config is under %HOME%/.config/jira-tui/config.json
 
 ## TODO
-    - Fix hardcoded sprint number in jira api
-    - Get rid of the hard copy of issues when getting the issue list
-    - Show some sort of error message when the user tries to do a modify or add with an active issue selected
-        - On that note, fix the add issue not working without an active issue being selected
+	- Helpbar is not actively updating when doing any operation until the TUI Layout func runs again.
+		This is due to how the layout functions get updated in order. Find a GOOD way around this?
 
 ## ROADMAP
     - Backlog view
@@ -31,4 +29,4 @@ All of the keybindings can be modified for any of the views. The config is under
     - Ability to change board
     - Another keybind for changing the issue summary
     - Add primary/secondary boolean to the keymaps, where only primary are shown in help bar, and a help button can be hit to show all commands
-    - Rewrite with each view section being a layout with it's own handlers
+    - ~~Rewrite with each view section being a layout with it's own handlers~~
